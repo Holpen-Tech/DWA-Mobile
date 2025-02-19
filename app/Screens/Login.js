@@ -1,15 +1,29 @@
-import React from "react";
+import React, { useContext, useState } from 'react';
+
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity 
+} from "react-native";
+
 import styled from "styled-components/native";
-import { View, Text, StyleSheet } from "react-native";
+
 import { Formik } from "formik";
+
 import {
   StyledContainer,
-  InnerContainer,
+  InnerConetainer,
   StyledFormArea,
   TextLink,
   TextLinkContent,
 } from "../../components/styles";
+
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+
+import { AuthContext } from "../index";
+import { api } from "../../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // API client
 import axios from "axios";
@@ -111,6 +125,35 @@ const LanguageSelector = styled.Text`
 `;
 
 export default function LoginScreen({ navigation }) {
+  const { signIn } = useContext(AuthContext);
+  const [rememberMe, setRememberMe] = React.useState(false);
+
+  const handleLogin = async (values) => {
+    try {
+      console.log('Attempting login...');
+      
+      const response = await api.auth.login({
+        email: values.email,
+        password: values.password
+      });
+      console.log('Login response:', response);
+  
+      if (rememberMe) {
+        await AsyncStorage.setItem('rememberMe', 'true');
+      }
+  
+      await signIn(response.token);
+      navigation.navigate('Homepage');
+    } catch (error) {
+      console.error('Login error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+      alert(error.response?.data?.error || error.message || 'Login failed. Please check your network connection.');
+    }
+  };
+  
   return (
     <Container>
       <Logo source={require("./DWA-logo.png")} />
@@ -123,12 +166,9 @@ export default function LoginScreen({ navigation }) {
 
       <Formik
         initialValues={{ email: "", password: "" }}
-        onSubmit={(values) => {
-          // Placeholder for future form submission logic
-          console.log("Form data:", values);
-        }}
+        onSubmit={handleLogin}
       >
-        {({ handleChange, handleBlur, values }) => (
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
           <>
             <StyledFormArea>
               <Label>Email Address</Label>
@@ -149,12 +189,15 @@ export default function LoginScreen({ navigation }) {
                 placeholderTextColor="#888888"
               />
             </StyledFormArea>
+
             <RememberMeContainer>
-              <Checkbox />
+              <TouchableOpacity onPress={() => setRememberMe(!rememberMe)}>
+                <Checkbox style={rememberMe ? {backgroundColor: '#28a745'} : {}} />
+              </TouchableOpacity>
               <RememberMeText>Remember Me</RememberMeText>
             </RememberMeContainer>
 
-            <Button onPress={() => navigation.navigate("Homepage")}>
+            <Button onPress={handleSubmit}>
               <ButtonText>Log In</ButtonText>
             </Button>
           </>
