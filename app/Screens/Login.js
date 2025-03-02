@@ -154,7 +154,7 @@ export default function LoginScreen({ navigation }) {
               <RememberMeText>Remember Me</RememberMeText>
             </RememberMeContainer>
 
-            <Button onPress={() => navigation.navigate("Homepage")}>
+            <Button onPress={() => navigation.navigate("MainContainer")}>
               <ButtonText>Log In</ButtonText>
             </Button>
           </>

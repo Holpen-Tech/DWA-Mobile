@@ -45,11 +45,6 @@ const SurveyPage = ({ navigation }) => {
           <Text style={styles.buttonTextSecondary}>Sign up now</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Pagination Section */}
-      <View style={styles.paginationContainer}>
-        <Text style={styles.pagination}>1 2 3 4 5</Text>
-      </View>
     </SafeAreaView>
   );
 };
