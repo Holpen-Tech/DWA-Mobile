@@ -11,8 +11,34 @@ import {
   TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import Mapbox, { MapView, Camera, Markers } from '@rnmapbox/maps';
 
 export default function JobMap({ navigation }) {
+  const [jobs, setJobs] = useState([]); // State to store job data
+  const [region, setRegion] = useState({
+    latitude: 43.6532, // Default latitude (e.g., Toronto)
+    longitude: -79.3832, // Default longitude (e.g., Toronto)
+    zoomLevel: 12, // Default zoom level
+  });
+
+  // Fetch jobs from the backend
+  const fetchJobsForRegion = async () => {
+    try {
+      const response = await fetch(
+        `http://192.24.44.206:3000/api/jobs/map?lat=${region.latitude}&lng=${region.longitude}&radius=50`
+      );
+      const data = await response.json();
+      setJobs(data); // Update jobs state
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
+  };
+
+  // Fetch jobs when the region changes
+  useEffect(() => {
+    fetchJobsForRegion();
+  }, [region]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
