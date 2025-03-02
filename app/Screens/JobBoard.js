@@ -25,16 +25,18 @@ export default function JobBoard({ navigation }) {
   const [sortBy, setSortBy] = useState(null);
 
   useEffect(() => {
-    fetch("http://192.168.2.16:3000/api/jobs")
+    fetch("http://YOUR_IP_ADDRESS:3000/api/jobs") // Greatness: chances are, you will get an error, so add your IP address appropriately
       .then((response) => response.json())
       .then((data) => {
-        setJobData(data);
-        setFilteredJobs(data);
+        // Check if data.jobs exists, otherwise use empty array
+        const jobsArray = data.jobs || [];
+        setJobData(jobsArray);
+        setFilteredJobs(jobsArray);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
-
+  
   const applyFilters = () => {
     let filtered = [...jobData];
 
