@@ -1,17 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components/native";
-import { View, Text, StyleSheet } from "react-native";
-import { Formik } from "formik";
 import {
-  StyledContainer,
-  InnerContainer,
-  StyledFormArea,
-  TextLink,
-  TextLinkContent,
-} from "../../components/styles";
-import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
-
-// API client
+  View,
+  Text,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
+import { Formik } from "formik";
+import * as Yup from "yup";
 import axios from "axios";
 
 // Styled Components
@@ -24,8 +24,8 @@ const Container = styled.View`
 `;
 
 const Logo = styled.Image`
-  width: 100px; /* Adjust the width to your desired size */
-  height: 100px; /* Adjust the height to your desired size */
+  width: 100px;
+  height: 100px;
   margin-bottom: 20px;
 `;
 
@@ -36,10 +36,8 @@ const Title = styled.Text`
   margin-bottom: 10px;
 `;
 
-const Subtitle = styled.Text`
-  font-size: 14px;
-  color: #777777;
-  margin-bottom: 30px;
+const InputWrapper = styled.View`
+  width: 100%;
 `;
 
 const Input = styled.TextInput`
@@ -90,8 +88,8 @@ const Label = styled.Text`
   font-size: 14px;
   font-weight: bold;
   color: #555555;
-  align-self: flex-start; /* Aligns the text to the left */
-  margin-bottom: 5px; /* Adds spacing between the label and input */
+  align-self: flex-start;
+  margin-bottom: 5px;
 `;
 
 const FooterText = styled.Text`
@@ -110,62 +108,135 @@ const LanguageSelector = styled.Text`
   margin-top: 30px;
 `;
 
+const LoginSchema = Yup.object().shape({
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+});
+
 export default function LoginScreen({ navigation }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (values) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "http://YOUR_IP_ADDRESS:3000/api/auth/login", // do make sure to include your IP address here
+        {
+          email: values.email,
+          password: values.password,
+        }
+      );
+
+      if (response.data.success) {
+        const token = response.data.token;
+        console.log("Login successful! Token:", token);
+        navigation.navigate("MainContainer");
+      } else {
+        Alert.alert("Error", response.data.message || "Login failed");
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Container>
-      <Logo source={require("./DWA-logo.png")} />
-
-      <Title>Get back in</Title>
-      <Text>OR</Text>
-      <TextLink onPress={() => navigation.navigate("Signup")}>
-        <TextLinkContent>Join DWA</TextLinkContent>
-      </TextLink>
-
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        onSubmit={(values) => {
-          // Placeholder for future form submission logic
-          console.log("Form data:", values);
-        }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        keyboardShouldPersistTaps="handled"
       >
-        {({ handleChange, handleBlur, values }) => (
-          <>
-            <StyledFormArea>
-              <Label>Email Address</Label>
-              <Input
-                placeholder="Enter your Email Address"
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                value={values.email}
-                placeholderTextColor="#888888"
-              />
-              <Label>Password</Label>
-              <Input
-                placeholder="*****************"
-                secureTextEntry
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-                value={values.password}
-                placeholderTextColor="#888888"
-              />
-            </StyledFormArea>
-            <RememberMeContainer>
-              <Checkbox />
-              <RememberMeText>Remember Me</RememberMeText>
-            </RememberMeContainer>
+        <Container>
+          <Logo source={require("./DWA-logo.png")} />
 
-            <Button onPress={() => navigation.navigate("Homepage")}>
-              <ButtonText>Log In</ButtonText>
-            </Button>
-          </>
-        )}
-      </Formik>
+          <Title>Get back in</Title>
+          <Text>OR</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+            <Text style={{ color: "#0056b3", textDecorationLine: "underline" }}>
+              Join DWA
+            </Text>
+          </TouchableOpacity>
 
-      <FooterText>
-        Lost your password? <FooterLink>Reset Password</FooterLink>
-      </FooterText>
+          <Formik
+            initialValues={{ email: "", password: "" }}
+            validationSchema={LoginSchema}
+            onSubmit={handleLogin}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
+              <InputWrapper>
+                <Label>Email Address</Label>
+                <Input
+                  placeholder="Enter your Email Address"
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  value={values.email}
+                  placeholderTextColor="#888888"
+                  keyboardType="email-address"
+                />
+                {errors.email && touched.email && (
+                  <Text style={{ color: "red", fontSize: 12 }}>
+                    {errors.email}
+                  </Text>
+                )}
 
-      <LanguageSelector>🌐 English (United States)</LanguageSelector>
-    </Container>
+                <Label>Password</Label>
+                <Input
+                  placeholder="*****************"
+                  secureTextEntry
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  value={values.password}
+                  placeholderTextColor="#888888"
+                />
+                {errors.password && touched.password && (
+                  <Text style={{ color: "red", fontSize: 12 }}>
+                    {errors.password}
+                  </Text>
+                )}
+
+                <RememberMeContainer>
+                  <Checkbox />
+                  <RememberMeText>Remember Me</RememberMeText>
+                </RememberMeContainer>
+
+                <Button onPress={handleSubmit} disabled={loading}>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <ButtonText>Log In</ButtonText>
+                  )}
+                </Button>
+              </InputWrapper>
+            )}
+          </Formik>
+
+          <FooterText>
+            Lost your password?{" "}
+            <FooterLink onPress={() => navigation.navigate("ResetPassword")}>
+              Reset Password
+            </FooterLink>
+          </FooterText>
+
+          <LanguageSelector>🌐 English (United States)</LanguageSelector>
+        </Container>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

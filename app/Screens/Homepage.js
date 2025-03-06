@@ -22,20 +22,24 @@ export default function Homepage({ navigation }) {
       screen: "JobMap",
     },
     {
-      title: "Resume Builder",
-      image: require("./Resumebuilderimage.png"),
+      title: "Career Explorer",
+      image: require("./Careerexplorerimage.png"),
+      screen: "CareerExplorer",
     },
-
     {
       title: "Career Calculator",
       image: require("./Careercalculatorimage.png"),
     },
-    { title: "Career Explorer", image: require("./Careerexplorerimage.png") },
+    {
+      title: "Resume Builder",
+      image: require("./Resumebuilderimage.png"),
+    },
     { title: "Cover Letter", image: require("./Coverletterimage.png") },
   ];
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Image source={require("./DWA-logo.png")} style={styles.logo} />
         <View style={styles.headerContent}>
@@ -52,6 +56,7 @@ export default function Homepage({ navigation }) {
         </View>
       </View>
 
+      {/* Feature Cards */}
       <ScrollView contentContainerStyle={styles.content}>
         {features.map((feature, index) => (
           <TouchableOpacity
@@ -66,25 +71,6 @@ export default function Homepage({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="home" size={20} color="#222222" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="bookmark" size={20} color="#222222" />
-          <Text style={styles.navText}>My Jobs</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="bell" size={20} color="#222222" />
-          <Text style={styles.navText}>Notifications</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="gear" size={20} color="#222222" />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -95,7 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#white",
+    backgroundColor: "white",
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
@@ -110,26 +96,23 @@ const styles = StyleSheet.create({
     padding: 5,
     marginLeft: 10,
   },
-
   content: { padding: 10, alignItems: "center" },
   card: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#213E64",
     borderRadius: 10,
-    //padding: 9,
     marginVertical: 7,
     width: "100%",
-    height: "95",
-    shadowColor: "#000", // Shadow color for iOS
-    shadowOffset: { width: 0, height: 2 }, // Shadow direction for iOS
-    shadowOpacity: 0.5, // Shadow opacity for iOS
-    shadowRadius: 3, // Shadow blur for iOS
-    elevation: 5, // Shadow for Android
-    borderColor: "#000", // Black border color
+    height: 95,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    elevation: 5,
+    borderColor: "#000",
     borderWidth: 1,
   },
-
   cardImage: { width: 168, height: 92, borderRadius: 10 },
   cardTitle: {
     color: "#fff",
@@ -137,7 +120,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingLeft: 30,
   },
-
   footer: {
     flexDirection: "row",
     justifyContent: "space-around",

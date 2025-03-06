@@ -33,10 +33,7 @@ export default function JobMap({ navigation }) {
 
       {/* Map Section */}
       <View style={styles.mapContainer}>
-        <Image
-          source={require("./Resumebuilderimage.png")}
-          style={styles.map}
-        />
+        <Image source={require("./jobsmap2.png")} style={styles.map} />
       </View>
 
       {/* Filters Section */}

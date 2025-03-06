@@ -1,23 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components/native";
+import axios from "axios";
 import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  View,
-  Text,
-  StyleSheet,
   TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Formik } from "formik";
-import {
-  StyledContainer,
-  InnerContainer,
-  StyledFormArea,
-  TextLink,
-  TextLinkContent,
-} from "../../components/styles";
+import * as Yup from "yup";
+import Icon from "react-native-vector-icons/Ionicons";
 
+// Styled Components
 const Container = styled.View`
   flex: 1;
   background-color: #ffffff;
@@ -38,10 +35,16 @@ const Title = styled.Text`
   text-align: center;
 `;
 
+const InputContainer = styled.View`
+  width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+`;
+
 const Input = styled.TextInput`
   width: 100%;
   padding: 15px;
-  margin-bottom: 15px;
+  padding-right: 50px;
   border: 1px solid #cccccc;
   border-radius: 5px;
   font-size: 16px;
@@ -69,6 +72,7 @@ const Label = styled.Text`
   color: #555555;
   align-self: flex-start;
   margin-bottom: 5px;
+  margin-top: 20px;
 `;
 
 const FooterText = styled.Text`
@@ -82,7 +86,56 @@ const FooterLink = styled.Text`
   text-decoration-line: underline;
 `;
 
+const ErrorText = styled.Text`
+  color: red;
+  margin-bottom: 10px;
+  font-size: 12px;
+`;
+
+// Validation Schema
+const SignupSchema = Yup.object().shape({
+  fullName: Yup.string().required("Full Name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
+});
+
 export default function SignupScreen({ navigation }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async (values) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "http://172.25.68.14:3000/api/auth/register",
+        {
+          fullName: values.fullName,
+          email: values.email,
+          password: values.password,
+        }
+      );
+
+      Alert.alert("Success", "Account created successfully!");
+      navigation.navigate("Login");
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (error.response) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container>
       <KeyboardAvoidingView
@@ -95,6 +148,7 @@ export default function SignupScreen({ navigation }) {
             flexGrow: 1,
             justifyContent: "center",
           }}
+          keyboardShouldPersistTaps="handled"
         >
           <Logo source={require("./DWA-logo.png")} />
 
@@ -107,54 +161,99 @@ export default function SignupScreen({ navigation }) {
               password: "",
               confirmPassword: "",
             }}
-            onSubmit={(values) => {
-              console.log("Form data:", values);
-            }}
+            validationSchema={SignupSchema}
+            onSubmit={handleSignup}
           >
-            {({ handleChange, handleBlur, handleSubmit, values }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
               <>
-                <StyledFormArea>
-                  <Label>Full Name</Label>
-                  <Input
-                    placeholder="John Doe"
-                    onChangeText={handleChange("fullName")}
-                    onBlur={handleBlur("fullName")}
-                    value={values.fullName}
-                    placeholderTextColor="#888888"
-                  />
+                <Label>Full Name</Label>
+                <Input
+                  placeholder="John Doe"
+                  onChangeText={handleChange("fullName")}
+                  onBlur={handleBlur("fullName")}
+                  value={values.fullName}
+                  placeholderTextColor="#888888"
+                />
+                {errors.fullName && touched.fullName && (
+                  <ErrorText>{errors.fullName}</ErrorText>
+                )}
 
-                  <Label>Email Address</Label>
-                  <Input
-                    placeholder="Enter your Email Address"
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    value={values.email}
-                    placeholderTextColor="#888888"
-                  />
+                <Label>Email Address</Label>
+                <Input
+                  placeholder="Enter your Email Address"
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  value={values.email}
+                  placeholderTextColor="#888888"
+                  keyboardType="email-address"
+                />
+                {errors.email && touched.email && (
+                  <ErrorText>{errors.email}</ErrorText>
+                )}
 
-                  <Label>Password</Label>
+                <Label>Password</Label>
+                <InputContainer>
                   <Input
                     placeholder="*****************"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     onChangeText={handleChange("password")}
                     onBlur={handleBlur("password")}
                     value={values.password}
                     placeholderTextColor="#888888"
                   />
+                  <TouchableOpacity
+                    style={{ position: "absolute", right: 15, top: 15 }}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Icon
+                      name={showPassword ? "eye-off" : "eye"}
+                      size={24}
+                      color="#888888"
+                    />
+                  </TouchableOpacity>
+                </InputContainer>
+                {errors.password && touched.password && (
+                  <ErrorText>{errors.password}</ErrorText>
+                )}
 
-                  <Label>Confirm Password</Label>
+                <Label>Confirm Password</Label>
+                <InputContainer>
                   <Input
                     placeholder="*****************"
-                    secureTextEntry
+                    secureTextEntry={!showConfirmPassword}
                     onChangeText={handleChange("confirmPassword")}
                     onBlur={handleBlur("confirmPassword")}
                     value={values.confirmPassword}
                     placeholderTextColor="#888888"
                   />
-                </StyledFormArea>
+                  <TouchableOpacity
+                    style={{ position: "absolute", right: 15, top: 15 }}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <Icon
+                      name={showConfirmPassword ? "eye-off" : "eye"}
+                      size={24}
+                      color="#888888"
+                    />
+                  </TouchableOpacity>
+                </InputContainer>
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <ErrorText>{errors.confirmPassword}</ErrorText>
+                )}
 
-                <Button onPress={handleSubmit}>
-                  <ButtonText>Sign Up</ButtonText>
+                <Button onPress={handleSubmit} disabled={loading}>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <ButtonText>Sign Up</ButtonText>
+                  )}
                 </Button>
               </>
             )}
