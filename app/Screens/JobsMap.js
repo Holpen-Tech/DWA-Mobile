@@ -1,18 +1,46 @@
-import { useSortedScreens } from "expo-router/build/useScreens";
-import React, { useState } from "react";
+//import { useSortedScreens } from "expo-router/build/useScreens";
+import Constants from 'expo-constants';
+import React, { useState, useEffect} from "react";
 import {
   View,
   Text,
   StyleSheet,
+  ActivityIndicator,
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
   Switch,
   TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import MapboxGL from "@rnmapbox/maps";            // ----jobs map feature
+
+// Get access token from app.json
+const MAPBOX_ACCESS_TOKEN = Constants.expoConfig.extra.MAPBOX_ACCESS_TOKEN;
+// Set the token for Mapbox
+MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN); //---jobs map feature
 
 export default function JobMap({ navigation }) {
+  const [jobs, setJobs] = useState([]); //---------- jobs map feature
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://172.25.113.163:3000/api/jobs/map") // Change YOUR_IP_ADDRESS
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.jobs) {
+          const validJobs = data.jobs.filter(job => job.latitude && job.longitude);
+          setJobs(validJobs); 
+        } else {
+          console.error("Unexpected API response:", data);
+          Alert.alert("Error", "Invalid job data received.");
+        }
+      })
+      .catch((error) => Alert.alert("Error fetching jobs", error.message))
+      .finally(() => setLoading(false));
+  }, []);                          // -------------- jobs map feature
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -31,13 +59,35 @@ export default function JobMap({ navigation }) {
         </View>
       </View>
 
+
       {/* Map Section */}
       <View style={styles.mapContainer}>
-        <Image
-          source={require("./Resumebuilderimage.png")}
-          style={styles.map}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#213E64" />
+        ) : (
+          <MapboxGL.MapView style={styles.map}>
+            <MapboxGL.Camera
+              zoomLevel={12}
+              centerCoordinate={[-78.8658, 43.8975]} // Default to Oshawa
+            />
+
+            {jobs.length > 0 ? (
+              jobs.map((job, index) => (
+                <MapboxGL.PointAnnotation
+                  key={index}
+                  id={`job-${index}`}
+                  coordinate={[job.longitude, job.latitude]}
+                >
+                  <View style={styles.markerDot}/>
+                </MapboxGL.PointAnnotation>
+              ))
+            ) : (
+              <Text style={styles.noJobsText}>No jobs available in this area.</Text>
+            )}
+          </MapboxGL.MapView>
+        )}
       </View>
+
 
       {/* Filters Section */}
       <ScrollView style={styles.filters}>
@@ -322,4 +372,37 @@ const styles = StyleSheet.create({
   },
   navButton: { alignItems: "center" },
   navText: { fontSize: 12, color: "#000" },
+
+  // 🔹 Added styles for job markers
+  marker: {
+    backgroundColor: "red",
+    padding: 5,
+    borderRadius: 10,
+  },
+  markerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "red",
+    padding: 5,
+    borderRadius: 10,
+  },
+  markerDot: {
+    width: 10,
+    height: 10,
+    backgroundColor: "red",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  markerText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  noJobsText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#333",
+  },
 });
