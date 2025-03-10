@@ -474,6 +474,13 @@ const CareerExplorer = ({ navigation }) => {
   const prevDistance = useRef(0);
   const isPinching = useRef(false);
 
+  // Helper to smoothly update scale for better transitions
+  const updateScaleWithAnimation = (newScale) => {
+    // Simple direct state update - no animation needed
+    setScale(newScale);
+    setLastScale(newScale);
+  };
+
   // Generate positions for bubbles that don't overlap
   useEffect(() => {
     setLoading(true);
@@ -503,13 +510,13 @@ const CareerExplorer = ({ navigation }) => {
         // Determine radius based on bubble size option
         let radius;
         if (bubbleSizeOption === 'Job Openings') {
-          radius = 20 + (category.count / 3); // Scale by job count
+          radius = 30 + (category.count / 3); // Scale by job count
         } else {
-          radius = 40; // Equal size for all
+          radius = 70; // Equal size for all
         }
         
         // Cap min/max size
-        radius = Math.max(30, Math.min(radius, 60));
+        radius = Math.max(50, Math.min(radius, 100));
         
         // Try to find non-overlapping position
         let x, y;
@@ -542,6 +549,12 @@ const CareerExplorer = ({ navigation }) => {
       
       setBubblePositions(positions);
       setLoading(false);
+
+      // Set initial scale to make bubbles more visible - add this line:
+      if (lastScale === 1 && scale === 1) {
+        setScale(3);
+        setLastScale(3);
+      } 
     }, 100);
   }, [categories, searchKeyword, selectedSector, bubbleSizeOption]);
 
@@ -570,7 +583,6 @@ const CareerExplorer = ({ navigation }) => {
         if (evt.nativeEvent.touches.length === 2) {
           const dist = distance(evt.nativeEvent.touches);
           initDistance.current = dist;
-          prevDistance.current = dist;
           isPinching.current = true;
         } else {
           isPinching.current = false;
@@ -583,15 +595,15 @@ const CareerExplorer = ({ navigation }) => {
           
           if (initDistance.current === 0) {
             initDistance.current = dist;
-            prevDistance.current = dist;
             return;
           }
           
-          const change = dist / prevDistance.current;
-          prevDistance.current = dist;
+          // Calculate scaling factor by comparing with initial distance
+          const scaleDelta = dist / initDistance.current;
           
-          // Apply scaling - limit to reasonable range
-          const newScale = Math.max(0.5, Math.min(3, scale * change));
+          // Increase max zoom limit from 3 to 5
+          const newScale = Math.max(0.5, Math.min(5, lastScale * scaleDelta));
+          
           setScale(newScale);
         } 
         // Handle panning when not pinching
@@ -603,16 +615,47 @@ const CareerExplorer = ({ navigation }) => {
         }
       },
       onPanResponderRelease: () => {
+        // Only update lastScale if we were actually pinching
+        if (isPinching.current) {
+          setLastScale(scale);
+        }
+        
         // Reset pinch state
         initDistance.current = 0;
-        prevDistance.current = 0;
         isPinching.current = false;
         
-        setLastScale(scale);
         panRef.flattenOffset();
       },
     })
   ).current;
+
+// Reference for tracking double taps
+const lastTapTimeRef = useRef(0);
+const doubleTapTimeout = useRef(null);
+
+// Function to handle double tap reset
+const handleDoubleTap = (event) => {
+  const now = Date.now();
+  const DOUBLE_TAP_DELAY = 300;
+  
+  if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
+    // Clear pending single-tap actions
+    clearTimeout(doubleTapTimeout.current);
+    
+    // Reset zoom and position directly without animation
+    setScale(1.5); // Reset to default enlarged view, not 1
+    setLastScale(1.5);
+    panRef.setValue({ x: 0, y: 0 });
+  } else {
+    // Set up to detect second tap
+    lastTapTimeRef.current = now;
+    
+    // Use timeout to separate single taps from double taps
+    doubleTapTimeout.current = setTimeout(() => {
+      // This was a single tap, no action needed
+    }, DOUBLE_TAP_DELAY);
+  }
+};
 
   // Filter categories based on search and sector filter
   const filterCategories = () => {
@@ -750,6 +793,60 @@ const CareerExplorer = ({ navigation }) => {
         </TouchableOpacity>
       </Modal>
     );
+  };
+
+  // function to wrap text within the cluster "bubbles"
+  const wrapText = (text, radius) => {
+    if (!text) return [];
+    
+    // Calculate max chars per line based on radius
+    // Approximate 6px per character for average font
+    const maxCharsPerLine = Math.floor(radius / 4);
+    
+    // Don't wrap very short text
+    if (text.length <= maxCharsPerLine) return [text];
+    
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+      // Test if adding this word exceeds the max line length
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      
+      if (testLine.length <= maxCharsPerLine) {
+        currentLine = testLine;
+      } else {
+        // If currentLine is not empty, push it and start a new line
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        // If the word itself is too long, truncate it
+        if (word.length > maxCharsPerLine) {
+          currentLine = word.substring(0, maxCharsPerLine-3) + '...';
+        } else {
+          currentLine = word;
+        }
+      }
+    });
+    
+    // Add the last line
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    
+    // Limit to 3 lines maximum
+    if (lines.length > 3) {
+      lines.splice(3);
+      const lastLine = lines[2];
+      if (lastLine.length > maxCharsPerLine - 3) {
+        lines[2] = lastLine.substring(0, maxCharsPerLine - 3) + '...';
+      } else {
+        lines[2] = lastLine + '...';
+      }
+    }
+    
+    return lines;
   };
 
   return (
@@ -902,6 +999,7 @@ const CareerExplorer = ({ navigation }) => {
       <View 
         style={styles.explorerContainer}
         {...panResponder.panHandlers}
+        onTouchEnd={handleDoubleTap} // adding a handler for the onTouchEnd style
       >
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -916,70 +1014,99 @@ const CareerExplorer = ({ navigation }) => {
                 transform: [
                   { translateX: panRef.x },
                   { translateY: panRef.y },
-                  { scale: scale }
+                  { scale: scale },
+                  { perspective: 1000 }
                 ]
               }
             ]}
           >
             <Svg
               ref={svgRef}
-              width={Dimensions.get('window').width * 2}
-              height={Dimensions.get('window').height * 2}
-              viewBox={`0 0 ${Dimensions.get('window').width * 2} ${Dimensions.get('window').height * 2}`}
+              width="100%" 
+              height="100%"
+              viewBox={`-${Dimensions.get('window').width/1.5} -${Dimensions.get('window').height/1.5} ${Dimensions.get('window').width * 4} ${Dimensions.get('window').height * 4}`}
+              preserveAspectRatio="xMidYMid meet"
+              style={{ backgroundColor: '#FFFFFF' }}
             >
               {bubblePositions.map((pos, index) => {
                 const isTrending = pos.category.count >= TRENDING_THRESHOLD;
                 const isSelected = selectedCategory?.id === pos.category.id;
                 const isRelated = selectedCategory && pos.category.isRelated && selectedCategory.id !== pos.category.id;
                 
-                // Calculate text size based on circle radius and name length
-                const textSize = Math.min(pos.radius / 3.5, 180 / pos.category.name.length);
+                // Calculate appropriate text size based on radius
+                const baseFontSize = Math.min(pos.radius / 2, 800 / pos.category.name.length);
+                const fontSize = Math.min(baseFontSize, 16); // Cap font size
+                
+                // Get wrapped text lines
+                const textLines = wrapText(pos.category.name, pos.radius);
                 
                 return (
                   <G key={index}>
-                    {/* Main Circle */}
+                    {/* Background fill circle */}
                     <Circle
                       cx={pos.x}
                       cy={pos.y}
                       r={pos.radius}
-                      fill={isTrending ? '#213E64' : 'transparent'}
+                      fill={isTrending ? '#213E64' : 'white'}
+                      stroke="none"
+                    />
+                    
+                    {/* Main Circle border */}
+                    <Circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={pos.radius}
+                      fill="none"
                       stroke={isRelated ? '#649A47' : '#213E64'}
                       strokeWidth={isSelected || isRelated ? 3 : 2}
+                      vectorEffect="non-scaling-stroke"
                       onPress={() => handleCategorySelect(pos.category)}
                     />
                     
-                    {/* Category Name Text */}
-                    <SvgText
-                      x={pos.x}
-                      y={pos.y}
-                      textAnchor="middle"
-                      alignmentBaseline="middle"
-                      fontSize={textSize}
-                      fill={isTrending ? 'white' : '#213E64'}
-                      fontWeight={isSelected ? 'bold' : 'normal'}
-                    >
-                      {pos.category.name.length > 25 
-                        ? pos.category.name.substring(0, 22) + '...' 
-                        : pos.category.name}
-                    </SvgText>
+                    {/* Render wrapped text lines */}
+                    {textLines.map((line, lineIndex) => {
+                      // Calculate vertical position for each line
+                      const lineCount = textLines.length;
+                      const lineHeight = fontSize * 1.2; // Add some line spacing
+                      const totalHeight = lineCount * lineHeight;
+                      const yOffset = (lineIndex - (lineCount - 1) / 2) * lineHeight;
+                      
+                      return (
+                        <SvgText
+                          key={`text-${index}-${lineIndex}`}
+                          x={pos.x}
+                          y={pos.y + yOffset}
+                          textAnchor="middle"
+                          alignmentBaseline="middle"
+                          fontSize={fontSize}
+                          fontWeight={isSelected ? 'bold' : 'normal'}
+                          fill={isTrending ? 'white' : '#213E64'}
+                          stroke={isTrending ? 'none' : 'rgba(255,255,255,0.5)'}
+                          strokeWidth="1"
+                        >
+                          {line}
+                        </SvgText>
+                      );
+                    })}
                     
-                    {/* Count Bubble */}
+                    {/* Count Bubble - INCREASED SIZE */}
                     <Circle
                       cx={pos.x}
-                      cy={pos.y + pos.radius - 10}
-                      r={16}
+                      cy={pos.y + pos.radius - 16} // Adjusted position
+                      r={24} // Increased from 16 to 24
                       fill="#649A47"
                     />
                     
-                    {/* Count Text */}
+                    {/* Count Text - INCREASED SIZE */}
                     <SvgText
                       x={pos.x}
-                      y={pos.y + pos.radius - 10}
+                      y={pos.y + pos.radius - 16} // Adjusted position
                       textAnchor="middle"
                       alignmentBaseline="middle"
-                      fontSize={12}
-                      fill="white"
+                      fontSize={16} // Increased from 12 to 16
                       fontWeight="bold"
+                      fill="white"
+                      stroke="none"
                     >
                       {pos.category.count}
                     </SvgText>
