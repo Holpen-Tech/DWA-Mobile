@@ -12,35 +12,38 @@ import {
   Alert,
   Switch,
   TextInput,
+  Platform,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import MapboxGL from "@rnmapbox/maps";            // ----jobs map feature
+import MapView, { Marker, Callout, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from "react-native-maps";
+//import MapboxGL from "@rnmapbox/maps";            // ----jobs map feature
 
 // Get access token from app.json
-const MAPBOX_ACCESS_TOKEN = Constants.expoConfig.extra.MAPBOX_ACCESS_TOKEN;
+//const MAPBOX_ACCESS_TOKEN = Constants.expoConfig.extra.MAPBOX_ACCESS_TOKEN;
 // Set the token for Mapbox
-MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN); //---jobs map feature
+//MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN); //---jobs map feature
 
-export default function JobMap({ navigation }) {
+export default function JobMap() {
   const [jobs, setJobs] = useState([]); //---------- jobs map feature
-  const [selectedJob, setSelectedJob] = useState(null);
+  //const [selectedJob, setSelectedJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://192.168.1.19:3000/api/jobs/map") // Change YOUR_IP_ADDRESS
+    fetch("http://172.25.113.163:3000/api/jobs/map") // replace with your IP
       .then((response) => response.json())
-      .then((data) => {
-        if (data.jobs) {
-          const validJobs = data.jobs.filter(job => job.latitude && job.longitude);
-          setJobs(validJobs); 
-        } else {
-          console.error("Unexpected API response:", data);
-          Alert.alert("Error", "Invalid job data received.");
-        }
-      })
-      .catch((error) => Alert.alert("Error fetching jobs", error.message))
+      .then((data) => setJobs(data.jobs))
+      .catch((error) => console.error("Error fetching jobs:", error))
       .finally(() => setLoading(false));
-  }, []);                          // -------------- jobs map feature
+  }, []);                         // -------------- jobs map feature
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#213E64" />
+      </View>
+    );
+  }
+
 
   return (
     <View style={styles.container}>
@@ -62,63 +65,30 @@ export default function JobMap({ navigation }) {
 
 
       {/* Map Section */}
-      {/* Map Section */}
-<View style={styles.mapContainer}>
-  {loading ? (
-    <ActivityIndicator size="large" color="#213E64" />
-  ) : (
-    <MapboxGL.MapView style={styles.map}>
-      <MapboxGL.Camera
-        zoomLevel={10}
-        centerCoordinate={[-78.8658, 43.8975]} // Default to Oshawa
-      />
-
-      {jobs.length > 0 ? (
-        jobs.map((job, index) => {
-          console.log("Rendering job:", job); // Debugging log
-
-          return (
-<MapboxGL.PointAnnotation
-  key={index}
-  id={`job-${index}`}
-  coordinate={[job.longitude, job.latitude]}
-  title='Callout'
-  onSelected={() => {
-    console.log("Marker clicked:", job); // Log the clicked job
-    setSelectedJob(job); // Update the selected job
-  }}
->
-  {/* Marker Icon */}
-  <View>
-    <Icon name="briefcase" size={20} color="#213E64" />
-  </View>
-
-  {/* Callout with Job Details */}
-  {selectedJob && selectedJob.job_title === job.job_title && (
-    <MapboxGL.Callout>
-      <View style={styles.calloutContainer}>
-        <Text style={styles.calloutText}>{selectedJob.job_title}</Text>
-        <Text style={styles.calloutText}>{selectedJob.employer}</Text>
-        <Text style={styles.calloutText}>{selectedJob.region}</Text>
-      </View>
-    </MapboxGL.Callout>
-  )}
-</MapboxGL.PointAnnotation>
-
-
-          );
-        })
-      ) : (
-        <Text style={styles.noJobsText}>No jobs available in this area.</Text>
-      )}
-    </MapboxGL.MapView>
-  )}
-</View>
-
-
-
-
-
+      <MapView
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+        style={styles.map}
+        initialRegion={{
+          latitude: 43.8975, // Oshawa
+          longitude: -78.8658,
+          latitudeDelta: 0.2,
+          longitudeDelta: 0.2,
+        }}
+      >
+        {jobs.map((job, index) => (
+          <Marker
+            key={index}
+            coordinate={{ latitude: job.latitude, longitude: job.longitude }}
+          >
+            <Callout>
+              <View style={styles.calloutContainer}>
+                <Text style={styles.calloutText}>{job.job_title}</Text>
+                <Text>{job.employer}</Text>
+              </View>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
 
       {/* Filters Section */}
       <ScrollView style={styles.filters}>
