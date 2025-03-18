@@ -23,10 +23,11 @@ MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN); //---jobs map feature
 
 export default function JobMap({ navigation }) {
   const [jobs, setJobs] = useState([]); //---------- jobs map feature
+  const [selectedJob, setSelectedJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://172.25.113.163:3000/api/jobs/map") // Change YOUR_IP_ADDRESS
+    fetch("http://192.168.1.19:3000/api/jobs/map") // Change YOUR_IP_ADDRESS
       .then((response) => response.json())
       .then((data) => {
         if (data.jobs) {
@@ -61,32 +62,62 @@ export default function JobMap({ navigation }) {
 
 
       {/* Map Section */}
-      <View style={styles.mapContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#213E64" />
-        ) : (
-          <MapboxGL.MapView style={styles.map}>
-            <MapboxGL.Camera
-              zoomLevel={12}
-              centerCoordinate={[-78.8658, 43.8975]} // Default to Oshawa
-            />
+      {/* Map Section */}
+<View style={styles.mapContainer}>
+  {loading ? (
+    <ActivityIndicator size="large" color="#213E64" />
+  ) : (
+    <MapboxGL.MapView style={styles.map}>
+      <MapboxGL.Camera
+        zoomLevel={10}
+        centerCoordinate={[-78.8658, 43.8975]} // Default to Oshawa
+      />
 
-            {jobs.length > 0 ? (
-              jobs.map((job, index) => (
-                <MapboxGL.PointAnnotation
-                  key={index}
-                  id={`job-${index}`}
-                  coordinate={[job.longitude, job.latitude]}
-                >
-                  <View style={styles.markerDot}/>
-                </MapboxGL.PointAnnotation>
-              ))
-            ) : (
-              <Text style={styles.noJobsText}>No jobs available in this area.</Text>
-            )}
-          </MapboxGL.MapView>
-        )}
+      {jobs.length > 0 ? (
+        jobs.map((job, index) => {
+          console.log("Rendering job:", job); // Debugging log
+
+          return (
+<MapboxGL.PointAnnotation
+  key={index}
+  id={`job-${index}`}
+  coordinate={[job.longitude, job.latitude]}
+  title='Callout'
+  onSelected={() => {
+    console.log("Marker clicked:", job); // Log the clicked job
+    setSelectedJob(job); // Update the selected job
+  }}
+>
+  {/* Marker Icon */}
+  <View>
+    <Icon name="briefcase" size={20} color="#213E64" />
+  </View>
+
+  {/* Callout with Job Details */}
+  {selectedJob && selectedJob.job_title === job.job_title && (
+    <MapboxGL.Callout>
+      <View style={styles.calloutContainer}>
+        <Text style={styles.calloutText}>{selectedJob.job_title}</Text>
+        <Text style={styles.calloutText}>{selectedJob.employer}</Text>
+        <Text style={styles.calloutText}>{selectedJob.region}</Text>
       </View>
+    </MapboxGL.Callout>
+  )}
+</MapboxGL.PointAnnotation>
+
+
+          );
+        })
+      ) : (
+        <Text style={styles.noJobsText}>No jobs available in this area.</Text>
+      )}
+    </MapboxGL.MapView>
+  )}
+</View>
+
+
+
+
 
 
       {/* Filters Section */}
@@ -404,5 +435,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "#333",
+  },
+  calloutContainer: {
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android
+  },
+  calloutText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#213E64",
+    textAlign: "center",
   },
 });
