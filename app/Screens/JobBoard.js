@@ -28,7 +28,7 @@ export default function JobBoard({ navigation }) {
   const [savedJobIds, setSavedJobIds] = useState(new Set());
 
   useEffect(() => {
-    fetch("http://YOUR_IP_ADDRESS:3000/api/jobs") // do make sure to include your IP address here
+    fetch("http://192.168.2.16:3000/api/jobs") // do make sure to include your IP address here
       .then((response) => response.json())
       .then((data) => {
         setJobData(data);
