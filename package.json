@@ -56,7 +56,9 @@
     "react-navigation": "^5.0.0",
     "styled-components": "^6.1.13",
     "yup": "^1.6.1",
-    "jest-expo": "~52.0.5"
+    "jest-expo": "~52.0.5",
+    "expo-dev-client": "~5.0.12",
+    "expo-location": "~18.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

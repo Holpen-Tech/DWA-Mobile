@@ -22,6 +22,15 @@ import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
 
+// settings page call stack
+import Security from "./Screens/Security";
+import Privacy from "./Screens/Privacy";
+import AccountPreferences from "./Screens/AccountPreferences";
+import NotificationSettings from "./Screens/NotificationSettings";
+import Language from "./Screens/Language";
+import HelpCenter from "./Screens/HelpCenter";
+import Signout from "./Screens/Signout";
+
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -48,6 +57,15 @@ export default function App() {
           <Stack.Screen name="JobMap" component={JobMap} />
           <Stack.Screen name="SavedJobs" component={SavedJobs} />
           <Stack.Screen name="CareerExplorer" component={CareerExplorer} />
+
+          {/* Settings pages */}
+          <Stack.Screen name="Security" component={Security} />
+          <Stack.Screen name="Privacy" component={Privacy} />
+          <Stack.Screen name="AccountPreferences" component={AccountPreferences} />
+          <Stack.Screen name="NotificationSettings" component={NotificationSettings} />
+          <Stack.Screen name="Language" component={Language} />
+          <Stack.Screen name="HelpCenter" component={HelpCenter} />
+          <Stack.Screen name="Signout" component={Signout} />
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationIndependentTree>

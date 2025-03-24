@@ -1,21 +1,29 @@
-import * as React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
-} from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+  Image, Modal,
+  Pressable, } from "react-native";
+  import Icon from "react-native-vector-icons/FontAwesome";
+  import { useNavigation } from "@react-navigation/native"; // Import navigation
+
 
 export default function Settings({ navigation }) {
+  const [modalVisible, setModalVisible] = useState(false);
+    
+  
+    // Function to handle signout
+    const handleSignout = () => {
+      setModalVisible(false); // Close the modal
+      navigation.replace("Login"); // Redirect to Login.js
+    };
+  
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require("./DWA-logo.png")}
+          source= {require("./DWA-logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -32,42 +40,75 @@ export default function Settings({ navigation }) {
 
       {/* Settings List */}
       <ScrollView style={styles.settingsList}>
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("AccountPreferences")}>
           <Icon name="user" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Account preference</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item}  onPress={() => navigation.navigate("Security")}>
           <Icon name="lock" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Security</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("Privacy")}>
           <Icon name="shield" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Privacy</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("NotificationSettings")}>
           <Icon name="bell" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Notification Settings</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("Language")}>
           <Icon name="globe" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Language</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
-          <Icon
-            name="question-circle"
-            size={24}
-            color="#000"
-            style={styles.icon}
-          />
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("HelpCenter")}>
+          <Icon name="question-circle" size={24} color="#000" style={styles.icon} />
           <Text style={styles.itemText}>Help Center</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.item} onPress={() => setModalVisible(true)}>
+          <Icon name="sign-out" size={24} color="red" style={styles.icon} />
+          <Text style={[styles.itemText, { color: 'red' }]}>Signout</Text>
+        </TouchableOpacity>
+
+         <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Confirm Signout</Text>
+                    <Text style={styles.modalText}>
+                      Are you sure you want to sign out?
+                    </Text>
+        
+                    {/* Button Row */}
+                    <View style={styles.buttonRow}>
+                      <Pressable
+                        style={[styles.button, styles.cancelButton]}
+                        onPress={() => setModalVisible(false)}
+                      >
+                        <Text style={styles.cancelText}>No</Text>
+                      </Pressable>
+        
+                      <Pressable
+                        style={[styles.button, styles.confirmButton]}
+                        onPress={handleSignout}
+                      >
+                        <Text style={styles.confirmText}>Yes</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
       </ScrollView>
-    </View>
+      </View>
   );
 }
 
@@ -142,5 +183,55 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  //Signout pop-up
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: 300,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  button: {
+    padding: 10,
+    borderRadius: 5,
+    width: "40%",
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#e0e0e0",
+  },
+  confirmButton: {
+    backgroundColor: "#213E64",
+  },
+  cancelText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+  confirmText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
