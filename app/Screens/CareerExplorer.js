@@ -117,11 +117,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 50,
+    paddingTop: 50, 
     paddingBottom: 10,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+  },
+  backButton: {
+    marginRight: 10,
   },
   headerTitle: {
     fontSize: 24,
@@ -131,10 +134,64 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row',
   },
-  filterButton: {
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 40, // Reduced from 50 to give more viewing area
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  headerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 15,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  headerButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    alignItems: 'center',
+    gap: 5,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    height: 35,
+  },
+  searchIcon: {
+    paddingHorizontal: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#213E64',
+    height: '100%',
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  filterButton: {
+    backgroundColor: '#213E64',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  filterText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginRight: 4, // Add space between icon and text
   },
   filterButtonText: {
     marginLeft: 5,
@@ -205,14 +262,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333333',
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
   },
   searchInput: {
     flex: 1,
@@ -423,6 +472,93 @@ const styles = StyleSheet.create({
   selectedSectorText: {
     color: '#649A47',
     fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    maxHeight: '80%', // Ensure it doesn't get too tall
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  filterTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 25,
+  },
+  applyButton: {
+    backgroundColor: '#213E64',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
+    alignItems: 'center',
+  },
+  clearButton: {
+    backgroundColor: '#649A47',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectorScrollView: {
+    maxHeight: 200, // Limit height so it doesn't take up too much space
+  },
+  sectorOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  selectedSectorOption: {
+    backgroundColor: '#F0F7EC',
+  },
+  sectorText: {
+    fontSize: 16,
+    color: '#333333',
   },
 });
 
@@ -851,15 +987,36 @@ const handleDoubleTap = (event) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Career Explorer</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity onPress={toggleFilters} style={styles.filterButton}>
-            <Ionicons name="filter" size={24} color="#213E64" />
-            <Text style={styles.filterButtonText}>Filters</Text>
+      <View style={styles.headerContainer}>
+        {/* Top row with back button and title */}
+        <View style={styles.headerTopRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#213E64" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}} style={styles.searchButton}>
-            <Ionicons name="search" size={24} color="#213E64" />
+          <Text style={styles.headerTitle}>Career Explorer</Text>
+        </View>
+        
+        {/* Search and Filter row */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={16} color="#666" style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search by Keyword..."
+              style={styles.searchInput}
+              value={searchKeyword}
+              onChangeText={setSearchKeyword}
+              placeholderTextColor="#666"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={toggleFilters}
+          >
+            <View style={styles.buttonContent}>
+              <Text style={styles.filterText}>Filters</Text>
+              <Ionicons name="funnel" size={14} color="#fff" />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -868,60 +1025,89 @@ const handleDoubleTap = (event) => {
       <Modal
         visible={showFilters}
         transparent={true}
-        animationType="slide"
+        animationType="fade"
         onRequestClose={toggleFilters}
       >
-        <View style={styles.filterModal}>
-          <View style={styles.filterModalContent}>
-            <View style={styles.filterHeader}>
+        <TouchableOpacity 
+          style={styles.modalContainer} 
+          activeOpacity={1} 
+          onPress={toggleFilters}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()} // Prevent closing when tapping on the content
+          >
+            <View style={styles.modalHeader}>
               <Text style={styles.filterTitle}>Filters</Text>
               <TouchableOpacity onPress={toggleFilters}>
                 <Ionicons name="close" size={24} color="#213E64" />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>KEYWORD SEARCH</Text>
-              <View style={styles.searchInputContainer}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search by Keyword..."
-                  value={searchKeyword}
-                  onChangeText={setSearchKeyword}
-                />
-                <TouchableOpacity style={styles.searchIcon}>
-                  <Ionicons name="search" size={20} color="#213E64" />
+            {/* Sector Filter Section - now a direct selector in the popup */}
+            <Text style={styles.filterLabel}>FILTER BY SECTOR</Text>
+            <ScrollView style={styles.sectorScrollView}>
+              <TouchableOpacity
+                style={[
+                  styles.sectorOption,
+                  selectedSector === '' && styles.selectedSectorOption
+                ]}
+                onPress={() => setSelectedSector('')}
+              >
+                <Text style={styles.sectorText}>Show All Sectors</Text>
+                {selectedSector === '' && (
+                  <Ionicons name="checkmark" size={18} color="#649A47" />
+                )}
+              </TouchableOpacity>
+              
+              {SECTORS.map((sector) => (
+                <TouchableOpacity
+                  key={sector}
+                  style={[
+                    styles.sectorOption,
+                    selectedSector === sector && styles.selectedSectorOption
+                  ]}
+                  onPress={() => setSelectedSector(sector)}
+                >
+                  <Text style={styles.sectorText}>{sector}</Text>
+                  {selectedSector === sector && (
+                    <Ionicons name="checkmark" size={18} color="#649A47" />
+                  )}
                 </TouchableOpacity>
-              </View>
-            </View>
+              ))}
+            </ScrollView>
 
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>FILTER BY SECTOR</Text>
-              <TouchableOpacity
-                style={styles.dropdownSelector}
-                onPress={openSectorSelector}
-              >
-                <Text>{selectedSector || 'Show All Sectors'}</Text>
-                <Ionicons name="chevron-down" size={20} color="#213E64" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>BUBBLE SIZE OPTIONS</Text>
-              <TouchableOpacity
-                style={styles.dropdownSelector}
-                onPress={toggleBubbleSizeModal}
-              >
-                <Text>Size by {bubbleSizeOption}</Text>
-                <Ionicons name="chevron-down" size={20} color="#213E64" />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={styles.resetButton} onPress={resetFilters}>
-              <Text style={styles.resetButtonText}>Reset Filters</Text>
+            {/* Bubble Size Options Section */}
+            <Text style={styles.filterLabel}>BUBBLE SIZE OPTIONS</Text>
+            <TouchableOpacity
+              style={styles.dropdownSelector}
+              onPress={toggleBubbleSizeModal}
+            >
+              <Text>Size by {bubbleSizeOption}</Text>
+              <Ionicons name="chevron-down" size={20} color="#213E64" />
             </TouchableOpacity>
-          </View>
-        </View>
+
+            {/* Button Row */}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.applyButton}
+                onPress={toggleFilters}
+              >
+                <Text style={styles.buttonText}>Apply Filters</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.clearButton}
+                onPress={() => {
+                  resetFilters();
+                  toggleFilters();
+                }}
+              >
+                <Text style={styles.buttonText}>Reset Filters</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {/* Sector Selector Modal */}
@@ -1186,26 +1372,6 @@ const handleDoubleTap = (event) => {
           </TouchableOpacity>
         </View>
       )}
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home-outline" size={24} color="#213E64" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.activeNavItem]}>
-          <Ionicons name="briefcase-outline" size={24} color="#649A47" />
-          <Text style={[styles.navText, styles.activeNavText]}>My Jobs</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="notifications-outline" size={24} color="#213E64" />
-          <Text style={styles.navText}>Notifications</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="settings-outline" size={24} color="#213E64" />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
