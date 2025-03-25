@@ -122,7 +122,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://192.168.2.183:3000/api/auth/login", // do make sure to include your IP address here
+        "http://172.25.89.88:3000/api/auth/login", // do make sure to include your IP address here
         {
           email: values.email,
           password: values.password,
