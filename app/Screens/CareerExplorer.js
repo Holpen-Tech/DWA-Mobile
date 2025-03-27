@@ -11,6 +11,7 @@ import {
   Modal,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { Svg, Circle, Text as SvgText, G } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -62,486 +63,10 @@ const generateMockCategories = () => {
   });
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50, 
-    paddingBottom: 10,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  backButton: {
-    marginRight: 10,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-  },
-  headerContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: 40, // Reduced from 50 to give more viewing area
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  headerTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  headerButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 5,
-    alignItems: 'center',
-    gap: 5,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    height: 35,
-  },
-  searchIcon: {
-    paddingHorizontal: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#213E64',
-    height: '100%',
-  },
-  backButton: {
-    marginRight: 10,
-  },
-  filterButton: {
-    backgroundColor: '#213E64',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  filterText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginRight: 4, // Add space between icon and text
-  },
-  filterButtonText: {
-    marginLeft: 5,
-    color: '#213E64',
-  },
-  searchButton: {},
-  explorerContainer: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
-  },
-  svgContainer: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#213E64',
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    color: '#ff3b30',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: '#213E64',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  filterModal: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-start',
-  },
-  filterModalContent: {
-    backgroundColor: '#F5F5F5',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  filterHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  filterTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  closeButton: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  filterSection: {
-    marginBottom: 20,
-  },
-  filterSectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333333',
-  },
-  searchInput: {
-    flex: 1,
-    padding: 12,
-  },
-  searchIcon: {
-    padding: 10,
-  },
-  sectorDropdown: {
-    marginBottom: 5,
-  },
-  bubbleSizeDropdown: {
-    marginBottom: 5,
-  },
-  dropdownSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-  },
-  dropdownOptions: {
-    maxHeight: 150,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-    borderRadius: 5,
-    marginTop: 5,
-  },
-  dropdownOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  resetButton: {
-    backgroundColor: '#213E64',
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  resetButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  detailsContainer: {
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    maxHeight: 300,
-  },
-  detailsHeader: {
-    marginBottom: 15,
-  },
-  detailsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  detailsSubtitle: {
-    fontSize: 14,
-    color: '#649A47',
-    fontWeight: '600',
-  },
-  detailSection: {
-    marginBottom: 15,
-  },
-  detailSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 5,
-  },
-  detailSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#213E64',
-  },
-  detailContent: {
-    fontSize: 14,
-    color: '#555555',
-    lineHeight: 20,
-    paddingVertical: 5,
-  },
-  skillsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingVertical: 5,
-  },
-  skillItem: {
-    backgroundColor: '#F0F7EC',
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    margin: 4,
-  },
-  skillText: {
-    color: '#649A47',
-    fontSize: 12,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeNavItem: {
-    borderTopWidth: 2,
-    borderTopColor: '#649A47',
-    paddingTop: 5,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 2,
-    color: '#213E64',
-  },
-  activeNavText: {
-    color: '#649A47',
-    fontWeight: 'bold',
-  },
-  // Modal related styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    width: '80%',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  modalOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  selectedOption: {
-    backgroundColor: '#F0F7EC',
-  },
-  modalOptionText: {
-    fontSize: 16,
-    color: '#333333',
-  },
-  disabledOption: {
-    opacity: 0.5,
-  },
-  disabledOptionText: {
-    color: '#999999',
-  },
-  sectorList: {
-    maxHeight: 400,
-  },
-  sectorItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  selectedSector: {
-    backgroundColor: '#F0F7EC',
-  },
-  sectorText: {
-    fontSize: 16,
-    color: '#333333',
-  },
-  selectedSectorText: {
-    color: '#649A47',
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    maxHeight: '80%', // Ensure it doesn't get too tall
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  filterTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#213E64',
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginTop: 15,
-    marginBottom: 10,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 25,
-  },
-  applyButton: {
-    backgroundColor: '#213E64',
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  clearButton: {
-    backgroundColor: '#649A47',
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginLeft: 5,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sectorScrollView: {
-    maxHeight: 200, // Limit height so it doesn't take up too much space
-  },
-  sectorOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  selectedSectorOption: {
-    backgroundColor: '#F0F7EC',
-  },
-  sectorText: {
-    fontSize: 16,
-    color: '#333333',
-  },
-});
-
 const CareerExplorer = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryJobs, setCategoryJobs] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedSector, setSelectedSector] = useState('');
   const [bubbleSizeOption, setBubbleSizeOption] = useState('Equal');
@@ -552,8 +77,11 @@ const CareerExplorer = ({ navigation }) => {
     description: false,
     skills: false,
     salary: false,
+    jobs: false,
+    codes: false,
   });
   const [loading, setLoading] = useState(true);
+  const [jobsLoading, setJobsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [scale, setScale] = useState(1);
   const [lastScale, setLastScale] = useState(1);
@@ -593,6 +121,22 @@ const CareerExplorer = ({ navigation }) => {
       // Fallback to mock data if API fails
       setCategories(generateMockCategories());
       setLoading(false);
+    }
+  };
+
+  // Fetch jobs for a specific category
+  const fetchCategoryJobs = async (categoryName) => {
+    if (!categoryName) return;
+    
+    try {
+      setJobsLoading(true);
+      const data = await api.jobs.getCategoryDetail(categoryName);
+      setCategoryJobs(data.jobs || []);
+      setJobsLoading(false);
+    } catch (err) {
+      console.error('Error fetching category jobs:', err);
+      setCategoryJobs([]);
+      setJobsLoading(false);
     }
   };
 
@@ -796,7 +340,13 @@ const CareerExplorer = ({ navigation }) => {
 
   // Handle category selection
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category.id === selectedCategory?.id ? null : category);
+    if (category.id === selectedCategory?.id) {
+      setSelectedCategory(null);
+      setCategoryJobs([]);
+    } else {
+      setSelectedCategory(category);
+      fetchCategoryJobs(category.name);
+    }
   };
 
   // Toggle filter view
@@ -889,6 +439,49 @@ const CareerExplorer = ({ navigation }) => {
     }
     
     return lines;
+  };
+
+  // Format date for job cards
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
+  // Handle job click to open URL
+  const handleJobClick = (url) => {
+    if (!url) return;
+    
+    Linking.canOpenURL(url)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          Alert.alert('Error', 'Cannot open this URL');
+        }
+      })
+      .catch(err => console.error('Error opening URL:', err));
+  };
+
+  // Render job card for the category detail section
+  const renderJobCard = (job) => {
+    const jobType = job.type === 'PT' ? 'Part Time' : 'Full Time';
+    const location = job.location || 'Location not specified';
+    const formattedDate = formatDate(job.postDate);
+    
+    return (
+      <TouchableOpacity 
+        key={job.id} 
+        style={styles.jobCard}
+        onPress={() => handleJobClick(job.url)}
+      >
+        <Text style={styles.jobTitle}>{job.title}</Text>
+        <Text style={styles.jobCompany}>{job.employer}</Text>
+        <Text style={styles.jobDetails}>
+          {formattedDate} · {location} · {jobType}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   // Sector selector component
@@ -1165,7 +758,7 @@ const CareerExplorer = ({ navigation }) => {
               ]}
               onPress={() => {
                 // This option is disabled as mentioned in requirements
-                alert('Median Salary data will be available in future updates.');
+                Alert.alert('Median Salary data will be available in future updates.');
               }}
             >
               <Text style={[
@@ -1304,76 +897,723 @@ const CareerExplorer = ({ navigation }) => {
         </View>
       )}
 
-      {/* Details Section */}
+      {/* Details Section - Now Scrollable */}
       {selectedCategory && (
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailsHeader}>
-            <Text style={styles.detailsTitle}>{selectedCategory.name}</Text>
-            <Text style={styles.detailsSubtitle}>{selectedCategory.count} Active Job Postings</Text>
-          </View>
-          
-          <TouchableOpacity
-            style={styles.detailSection}
-            onPress={() => toggleDetailSection('description')}
-          >
-            <View style={styles.detailSectionHeader}>
-              <Text style={styles.detailSectionTitle}>Job Description</Text>
-              <Ionicons
-                name={detailsActive.description ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#213E64"
-              />
-            </View>
-            {detailsActive.description && (
-              <Text style={styles.detailContent}>{selectedCategory.description}</Text>
-            )}
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.detailSection}
-            onPress={() => toggleDetailSection('skills')}
-          >
-            <View style={styles.detailSectionHeader}>
-              <Text style={styles.detailSectionTitle}>Skills</Text>
-              <Ionicons
-                name={detailsActive.skills ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#213E64"
-              />
-            </View>
-            {detailsActive.skills && (
-              <View style={styles.skillsList}>
-                {selectedCategory.skills.map((skill, index) => (
-                  <View key={index} style={styles.skillItem}>
-                    <Text style={styles.skillText}>{skill}</Text>
-                  </View>
-                ))}
+        <ScrollView style={styles.detailsScrollContainer}>
+          <View style={styles.detailsContainer}>
+            <View style={styles.detailsHeader}>
+              <Text style={styles.detailsTitle}>{selectedCategory.name}</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setSelectedCategory(null)}
+              >
+                <Ionicons name="close" size={24} color="#213E64" />
+              </TouchableOpacity>
+            </View>            
+
+            {/* Jobs Section - New Expandable Section */}
+            <TouchableOpacity
+              style={styles.detailSection}
+              onPress={() => toggleDetailSection('jobs')}
+            >
+              <View style={styles.detailSectionHeader}>
+                <Text style={styles.detailSectionTitle}>
+                  {selectedCategory.count} Active Job Posting(s)
+                </Text>
+                <Ionicons
+                  name={detailsActive.jobs ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#213E64"
+                />
               </View>
-            )}
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.detailSection}
-            onPress={() => toggleDetailSection('salary')}
-          >
-            <View style={styles.detailSectionHeader}>
-              <Text style={styles.detailSectionTitle}>Wage / Salary</Text>
-              <Ionicons
-                name={detailsActive.salary ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#213E64"
-              />
-            </View>
-            {detailsActive.salary && (
-              <Text style={styles.detailContent}>
-                Average annual salary range: {selectedCategory.salary}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
+              {detailsActive.jobs && (
+                <View style={styles.jobsList}>
+                  {jobsLoading ? (
+                    <ActivityIndicator size="small" color="#213E64" style={styles.jobsLoading} />
+                  ) : categoryJobs && categoryJobs.length > 0 ? (
+                    categoryJobs.map(job => renderJobCard(job))
+                  ) : (
+                    <Text style={styles.noJobsText}>No jobs available for this category</Text>
+                  )}
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.detailSection}
+              onPress={() => toggleDetailSection('description')}
+            >
+              <View style={styles.detailSectionHeader}>
+                <Text style={styles.detailSectionTitle}>Job Description</Text>
+                <Ionicons
+                  name={detailsActive.description ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#213E64"
+                />
+              </View>
+              {detailsActive.description && (
+                <Text style={styles.detailContent}>{selectedCategory.description}</Text>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.detailSection}
+              onPress={() => toggleDetailSection('skills')}
+            >
+              <View style={styles.detailSectionHeader}>
+                <Text style={styles.detailSectionTitle}>Skills</Text>
+                <Ionicons
+                  name={detailsActive.skills ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#213E64"
+                />
+              </View>
+              {detailsActive.skills && (
+                <View style={styles.skillsList}>
+                  {selectedCategory.skills.map((skill, index) => (
+                    <View key={index} style={styles.skillItem}>
+                      <Text style={styles.skillText}>{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.detailSection}
+              onPress={() => toggleDetailSection('salary')}
+            >
+              <View style={styles.detailSectionHeader}>
+                <Text style={styles.detailSectionTitle}>Wage / Salary</Text>
+                <Ionicons
+                  name={detailsActive.salary ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#213E64"
+                />
+              </View>
+              {detailsActive.salary && (
+                <Text style={styles.detailContent}>
+                  Average annual salary range: {selectedCategory.salary}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.detailSection}
+              onPress={() => toggleDetailSection('codes')}
+            >
+              <View style={styles.detailSectionHeader}>
+                <Text style={styles.detailSectionTitle}>Classification Codes</Text>
+                <Ionicons
+                  name={detailsActive.codes ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#213E64"
+                />
+              </View>
+              {detailsActive.codes && (
+                <View>
+                  {selectedCategory.nocCodes && selectedCategory.nocCodes.length > 0 && (
+                    <View style={styles.codeSection}>
+                      <Text style={styles.codeTitle}>NOC Codes:</Text>
+                      <View style={styles.codesList}>
+                        {selectedCategory.nocCodes.slice(0, 5).map((code, index) => (
+                          <View key={index} style={styles.codeItem}>
+                            <Text style={styles.codeText}>{code}</Text>
+                          </View>
+                        ))}
+                        {selectedCategory.nocCodes.length > 5 && (
+                          <Text style={styles.moreCodesText}>+{selectedCategory.nocCodes.length - 5} more</Text>
+                        )}
+                      </View>
+                    </View>
+                  )}
+                  
+                  {selectedCategory.naicsCodes && selectedCategory.naicsCodes.length > 0 && (
+                    <View style={styles.codeSection}>
+                      <Text style={styles.codeTitle}>NAICS Codes:</Text>
+                      <View style={styles.codesList}>
+                        {selectedCategory.naicsCodes.slice(0, 5).map((code, index) => (
+                          <View key={index} style={styles.codeItem}>
+                            <Text style={styles.codeText}>{code}</Text>
+                          </View>
+                        ))}
+                        {selectedCategory.naicsCodes.length > 5 && (
+                          <Text style={styles.moreCodesText}>+{selectedCategory.naicsCodes.length - 5} more</Text>
+                        )}
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 50, 
+    paddingBottom: 10,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+  },
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 40, // Reduced from 50 to give more viewing area
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  headerButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    alignItems: 'center',
+    gap: 5,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    height: 35,
+  },
+  searchIcon: {
+    paddingHorizontal: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#213E64',
+    height: '100%',
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  filterButton: {
+    backgroundColor: '#213E64',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  filterText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginRight: 4, // Add space between icon and text
+  },
+  filterButtonText: {
+    marginLeft: 5,
+    color: '#213E64',
+  },
+  searchButton: {},
+  explorerContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+  },
+  svgContainer: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#213E64',
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    color: '#ff3b30',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#213E64',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  filterModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+  },
+  filterModalContent: {
+    backgroundColor: '#F5F5F5',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  filterTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  closeButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  filterSection: {
+    marginBottom: 20,
+  },
+  filterSectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333333',
+  },
+  searchInput: {
+    flex: 1,
+    padding: 12,
+  },
+  searchIcon: {
+    padding: 10,
+  },
+  sectorDropdown: {
+    marginBottom: 5,
+  },
+  bubbleSizeDropdown: {
+    marginBottom: 5,
+  },
+  dropdownSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+  },
+  dropdownOptions: {
+    maxHeight: 150,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 5,
+    marginTop: 5,
+  },
+  dropdownOption: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  resetButton: {
+    backgroundColor: '#213E64',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  resetButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  // Updated scrollable details section
+  detailsScrollContainer: {
+    maxHeight: 350, // Increased max height to accommodate more content
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  detailsContainer: {
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+  },
+  detailsHeader: {
+    marginBottom: 15,
+  },
+  detailsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  detailsSubtitle: {
+    fontSize: 14,
+    color: '#649A47',
+    fontWeight: '600',
+  },
+  detailSection: {
+    marginBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+    paddingBottom: 10,
+  },
+  detailSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  detailSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#213E64',
+    flex: 1, // Allow the title to take available space
+    paddingRight: 10, // Add padding for long titles
+  },
+  detailContent: {
+    fontSize: 14,
+    color: '#555555',
+    lineHeight: 20,
+    paddingVertical: 5,
+  },
+  detailsWrapper: {
+    position: 'relative',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  skillsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingVertical: 5,
+  },
+  skillItem: {
+    backgroundColor: '#F0F7EC',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    margin: 4,
+  },
+  skillText: {
+    color: '#649A47',
+    fontSize: 12,
+  },
+  // Job listing styles
+  jobsList: {
+    marginTop: 5,
+  },
+  jobsLoading: {
+    marginVertical: 15,
+  },
+  noJobsText: {
+    fontStyle: 'italic',
+    color: '#666',
+    textAlign: 'center',
+    paddingVertical: 10,
+  },
+  jobCard: {
+    backgroundColor: '#213E64',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  jobTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  jobCompany: {
+    fontSize: 14,
+    color: '#cce4ff',
+    marginVertical: 4,
+  },
+  jobDetails: {
+    fontSize: 12,
+    color: '#cce4ff',
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeNavItem: {
+    borderTopWidth: 2,
+    borderTopColor: '#649A47',
+    paddingTop: 5,
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 2,
+    color: '#213E64',
+  },
+  activeNavText: {
+    color: '#649A47',
+    fontWeight: 'bold',
+  },
+  // Modal related styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    width: '80%',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  modalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  selectedOption: {
+    backgroundColor: '#F0F7EC',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  disabledOption: {
+    opacity: 0.5,
+  },
+  disabledOptionText: {
+    color: '#999999',
+  },
+  sectorList: {
+    maxHeight: 400,
+  },
+  sectorItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  selectedSector: {
+    backgroundColor: '#F0F7EC',
+  },
+  sectorText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  selectedSectorText: {
+    color: '#649A47',
+    fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    maxHeight: '80%', // Ensure it doesn't get too tall
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  filterTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#213E64',
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 25,
+  },
+  applyButton: {
+    backgroundColor: '#213E64',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
+    alignItems: 'center',
+  },
+  clearButton: {
+    backgroundColor: '#649A47',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectorScrollView: {
+    maxHeight: 200, // Limit height so it doesn't take up too much space
+  },
+  sectorOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  selectedSectorOption: {
+    backgroundColor: '#F0F7EC',
+  },
+  sectorText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  codeSection: {
+    marginVertical: 5,
+  },
+  codeTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#213E64',
+    marginBottom: 5,
+  },
+  codesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  codeItem: {
+    backgroundColor: '#E6F2FF',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    margin: 4,
+  },
+  codeText: {
+    color: '#213E64',
+    fontSize: 12,
+  },
+  moreCodesText: {
+    fontSize: 12,
+    color: '#666',
+    alignSelf: 'center',
+    marginLeft: 4,
+  },
+});
 
 export default CareerExplorer;
