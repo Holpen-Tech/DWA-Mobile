@@ -37,7 +37,7 @@ const AppContent = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://192.168.2.16:3000/api/auth/validate-token",
+            "http://172.25.101.162:3000/api/auth/validate-token",
             {
               headers: { Authorization: `Bearer ${token}` },
             }

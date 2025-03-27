@@ -125,7 +125,7 @@ export default function LoginScreen({ navigation }) {
         const token = await AsyncStorage.getItem("userToken");
         if (token) {
           const response = await axios.get(
-            "http://192.168.2.16:3000/api/auth/verify",
+            "http://172.25.101.162:3000/api/auth/verify",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -157,7 +157,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://192.168.2.16:3000/api/auth/login",
+        "http://172.25.101.162:3000/api/auth/login",
         {
           email: values.email,
           password: values.password,
