@@ -11,9 +11,11 @@ import {
   Linking,
   Modal,
   Share,
+  ScrollView,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 
 export default function JobBoard({ navigation }) {
   const [jobData, setJobData] = useState([]);
@@ -26,16 +28,36 @@ export default function JobBoard({ navigation }) {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [sortBy, setSortBy] = useState(null);
   const [savedJobIds, setSavedJobIds] = useState(new Set());
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [jobDetailsModalVisible, setJobDetailsModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    fetch("http://172.25.89.88:3000/api/jobs") // do make sure to include your IP address here
+  // Durham Region Municipalities
+  const DURHAM_REGIONS = [
+    "Ajax",
+    "Brock",
+    "Clarington",
+    "Oshawa",
+    "Pickering",
+    "Scugog",
+    "Uxbridge",
+    "Whitby",
+  ];
+
+  const fetchJobs = () => {
+    return fetch("http://YOUR_IP_ADDRESS:3000/api/jobs")
       .then((response) => response.json())
       .then((data) => {
         setJobData(data);
         setFilteredJobs(data);
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .catch((err) => setError(err.message));
+  };
+
+  useEffect(() => {
+    fetchJobs().finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -53,7 +75,6 @@ export default function JobBoard({ navigation }) {
     loadSavedJobs();
   }, []);
 
-  // Add this toggle save function
   const toggleSave = async (item) => {
     try {
       const saved = await AsyncStorage.getItem("savedJobs");
@@ -109,6 +130,7 @@ export default function JobBoard({ navigation }) {
     setFilteredJobs(jobData);
     setFilterVisible(false);
   };
+
   const handleShare = async (job) => {
     try {
       const result = await Share.share({
@@ -130,6 +152,14 @@ export default function JobBoard({ navigation }) {
       console.error("Error sharing:", error.message);
     }
   };
+  const openJobDetails = (job) => {
+    setSelectedJob(job);
+    setJobDetailsModalVisible(true);
+  };
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchJobs().finally(() => setRefreshing(false));
+  };
 
   const renderJobCard = ({ item }) => {
     const formattedDate = new Date(item.post_date).toISOString().split("T")[0];
@@ -137,13 +167,18 @@ export default function JobBoard({ navigation }) {
     const isSaved = savedJobIds.has(item._id);
 
     return (
-      <View style={styles.jobCard}>
+      <TouchableOpacity
+        style={styles.jobCard}
+        onPress={() => openJobDetails(item)}
+      >
         <Text style={styles.jobTitle}>{item.job_title}</Text>
         <Text style={styles.jobCompany}>{item.employer}</Text>
         <Text style={styles.jobDetails}>
           {formattedDate} · {item.region} · {jobType}
         </Text>
-        <Text style={styles.jobDescription}>{item.excerpt}</Text>
+        <Text style={styles.jobDescription} numberOfLines={2}>
+          {item.excerpt}
+        </Text>
         <View style={styles.jobActions}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -185,7 +220,7 @@ export default function JobBoard({ navigation }) {
             </View>
           </TouchableOpacity>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -222,7 +257,65 @@ export default function JobBoard({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
+      <Animated.View
+        style={styles.filterChipsContainer}
+        layout={Layout.duration(200)}
+      >
+        {selectedType && (
+          <Animated.View
+            style={styles.filterChip}
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            layout={Layout.duration(200)}
+          >
+            <Text style={styles.filterChipText}>
+              {selectedType === "FT" ? "Full Time" : "Part Time"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setSelectedType(null)}
+              style={styles.filterChipClose}
+            >
+              <Icon name="times" size={12} color="#213E64" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
+        {selectedRegion && (
+          <Animated.View
+            style={styles.filterChip}
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            layout={Layout.duration(200)}
+          >
+            <Text style={styles.filterChipText}>{selectedRegion}</Text>
+            <TouchableOpacity
+              onPress={() => setSelectedRegion(null)}
+              style={styles.filterChipClose}
+            >
+              <Icon name="times" size={12} color="#213E64" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {sortBy && (
+          <Animated.View
+            style={styles.filterChip}
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            layout={Layout.duration(200)}
+          >
+            <Text style={styles.filterChipText}>
+              {sortBy === "newest" ? "Newest First" : "Oldest First"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setSortBy(null)}
+              style={styles.filterChipClose}
+            >
+              <Icon name="times" size={12} color="#213E64" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </Animated.View>
       {loading ? (
         <ActivityIndicator size="large" color="#213E64" />
       ) : error ? (
@@ -235,6 +328,8 @@ export default function JobBoard({ navigation }) {
           keyExtractor={(item) => item._id}
           renderItem={renderJobCard}
           contentContainerStyle={styles.jobList}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
 
@@ -271,6 +366,27 @@ export default function JobBoard({ navigation }) {
                 <Text style={styles.optionText}>Part Time</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Region Filter */}
+            <Text style={styles.filterLabel}>Region</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.regionScrollContainer}
+            >
+              {DURHAM_REGIONS.map((region) => (
+                <TouchableOpacity
+                  key={region}
+                  style={[
+                    styles.filterOption,
+                    selectedRegion === region && styles.selectedOption,
+                  ]}
+                  onPress={() => setSelectedRegion(region)}
+                >
+                  <Text style={styles.optionText}>{region}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
 
             {/* Sorting */}
             <Text style={styles.filterLabel}>Sort By</Text>
@@ -312,6 +428,110 @@ export default function JobBoard({ navigation }) {
             </View>
           </View>
         </View>
+      </Modal>
+      {/* Job Details Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={jobDetailsModalVisible}
+        onRequestClose={() => setJobDetailsModalVisible(false)}
+      >
+        {selectedJob && (
+          <View style={styles.jobDetailsModalContainer}>
+            <View style={styles.jobDetailsModalContent}>
+              <TouchableOpacity
+                style={styles.closeModalButton}
+                onPress={() => setJobDetailsModalVisible(false)}
+              >
+                <Icon name="close" size={24} color="#213E64" />
+              </TouchableOpacity>
+
+              <ScrollView contentContainerStyle={styles.jobDetailsScrollView}>
+                <Text style={styles.jobDetailsTitle}>
+                  {selectedJob.job_title}
+                </Text>
+                <Text style={styles.jobDetailsCompany}>
+                  {selectedJob.employer}
+                </Text>
+
+                <View style={styles.jobDetailsInfoContainer}>
+                  <View style={styles.jobDetailsInfoItem}>
+                    <Icon name="calendar" size={16} color="#213E64" />
+                    <Text style={styles.jobDetailsInfoText}>
+                      Posted:{" "}
+                      {new Date(selectedJob.post_date).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View style={styles.jobDetailsInfoItem}>
+                    <Icon name="map-marker" size={16} color="#213E64" />
+                    <Text style={styles.jobDetailsInfoText}>
+                      {selectedJob.region}
+                    </Text>
+                  </View>
+                  <View style={styles.jobDetailsInfoItem}>
+                    <Icon name="briefcase" size={16} color="#213E64" />
+                    <Text style={styles.jobDetailsInfoText}>
+                      {selectedJob.type === "FT" ? "Full Time" : "Part Time"}
+                    </Text>
+                  </View>
+                  <View style={styles.jobDetailsInfoItem}>
+                    <Icon name="money" size={16} color="#213E64" />
+                    <Text style={styles.jobDetailsInfoText}>
+                      Annual Wage: $
+                      {selectedJob.harmonized_wage || "Not specified"}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.jobDetailsDescriptionTitle}>
+                  Job Description
+                </Text>
+                <Text style={styles.jobDetailsDescription}>
+                  {selectedJob.description || selectedJob.excerpt}
+                </Text>
+
+                {selectedJob.skill_names &&
+                  selectedJob.skill_names.length > 0 && (
+                    <>
+                      <Text style={styles.jobDetailsDescriptionTitle}>
+                        Required Skills
+                      </Text>
+                      <View style={styles.skillsContainer}>
+                        {selectedJob.skill_names.map((skill, index) => (
+                          <View key={index} style={styles.skillTag}>
+                            <Text style={styles.skillTagText}>{skill}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </>
+                  )}
+
+                <View style={styles.jobDetailsActionsContainer}>
+                  <TouchableOpacity
+                    style={styles.jobDetailsApplyButton}
+                    onPress={() =>
+                      Linking.openURL(selectedJob.url).catch((err) =>
+                        console.error("Failed to open URL", err)
+                      )
+                    }
+                  >
+                    <Text style={styles.jobDetailsApplyButtonText}>
+                      Apply Now
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.jobDetailsShareButton}
+                    onPress={() => handleShare(selectedJob)}
+                  >
+                    <Icon name="share" size={20} color="#fff" />
+                    <Text style={styles.jobDetailsShareButtonText}>Share</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        )}
       </Modal>
     </View>
   );
@@ -355,7 +575,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     padding: 10,
-    paddingLeft: 0, // Adjust based on icon spacing
+    paddingLeft: 0,
     fontSize: 14,
     color: "#213E64",
   },
@@ -394,23 +614,12 @@ const styles = StyleSheet.create({
   savedText: {
     color: "#213E64",
   },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-    paddingVertical: 12,
-    paddingBottom: 30,
-  },
-  navButton: { alignItems: "center" },
-  navText: { color: "#222222", fontSize: 12 },
   filterButton: {
     backgroundColor: "#213E64",
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 10,
   },
-  filterText: { color: "#fff", fontWeight: "bold" },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -430,71 +639,192 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
   },
-  filterOptions: { flexDirection: "column" },
+  filterOptions: {
+    flexDirection: "column",
+    gap: 10,
+  },
   filterOption: {
     padding: 10,
     backgroundColor: "#ccc",
     borderRadius: 5,
-    marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  selectedOption: { backgroundColor: "#213E64" },
-  optionText: { color: "#fff" },
+  selectedOption: {
+    backgroundColor: "#213E64",
+  },
+  optionText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  regionScrollContainer: {
+    flexDirection: "row",
+    gap: 10,
+  },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
   },
-  applyButton: { backgroundColor: "#213E64", padding: 10, borderRadius: 5 },
-  clearButton: { backgroundColor: "red", padding: 10, borderRadius: 5 },
-  buttonText: { color: "#fff", fontWeight: "bold" },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  actionButton: {
-    backgroundColor: "#0056b3",
-    padding: 8,
+  applyButton: {
+    backgroundColor: "#213E64",
+    padding: 10,
     borderRadius: 5,
-    flexDirection: "row",
-    alignItems: "center",
+    flex: 1,
+    marginRight: 10,
   },
-  savedButton: {
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#213E64",
+  clearButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
   },
-  actionText: {
-    fontSize: 12,
+  buttonText: {
     color: "#fff",
-  },
-  savedText: {
-    color: "#213E64",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-  actionButton: {
-    backgroundColor: "#0056b3",
-    padding: 8,
-    borderRadius: 5,
-    flexDirection: "row",
+  jobDetailsModalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     alignItems: "center",
   },
-  savedButton: {
+  jobDetailsModalContent: {
+    width: "90%",
     backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#213E64",
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: "90%",
   },
-  actionText: {
-    fontSize: 12,
-    color: "#fff",
+  closeModalButton: {
+    alignSelf: "flex-end",
+    marginBottom: 10,
   },
-  savedText: {
+  jobDetailsScrollView: {
+    paddingBottom: 20,
+  },
+  jobDetailsTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
     color: "#213E64",
+    marginBottom: 5,
+  },
+  jobDetailsCompany: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 15,
+  },
+  jobDetailsInfoContainer: {
+    flexDirection: "column",
+    marginBottom: 15,
+  },
+  jobDetailsInfoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  jobDetailsInfoText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "#333",
+  },
+  jobDetailsDescriptionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#213E64",
+    marginBottom: 10,
+  },
+  jobDetailsDescription: {
+    fontSize: 16,
+    color: "#333",
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  jobDetailsActionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  jobDetailsApplyButton: {
+    backgroundColor: "#213E64",
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    marginRight: 10,
+    alignItems: "center",
+  },
+  jobDetailsApplyButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  jobDetailsShareButton: {
+    backgroundColor: "#0056b3",
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  jobDetailsShareButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  skillsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 5,
+    marginBottom: 20,
+  },
+  skillTag: {
+    backgroundColor: "#213E64",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  skillTagText: {
+    color: "white",
+    fontSize: 12,
+  },
+  filterChipsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+    minHeight: 20, // Prevent layout shift when empty
+  },
+  filterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e3f2fd",
+    borderRadius: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    shadowColor: "#213E64",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  filterChipText: {
+    color: "#213E64",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  filterChipClose: {
+    marginLeft: 6,
+    padding: 2,
+    borderRadius: 10,
+    backgroundColor: "rgba(33, 62, 100, 0.1)",
   },
 });

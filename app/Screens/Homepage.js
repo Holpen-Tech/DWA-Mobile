@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Animated,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -37,19 +38,35 @@ export default function Homepage({ navigation }) {
     { title: "Cover Letter", image: require("./Coverletterimage.png") },
   ];
 
+  // Create an array of animated values for each card
+  const animatedValues = useRef(
+    features.map(() => new Animated.Value(0))
+  ).current;
+
+  // Animate cards one by one
+  useEffect(() => {
+    const animations = features.map((_, index) =>
+      Animated.timing(animatedValues[index], {
+        toValue: 1,
+        duration: 500, // Animation duration
+        delay: index * 200, // Delay between animations
+        useNativeDriver: true, // Use native driver for better performance
+      })
+    );
+
+    // Start all animations
+    Animated.stagger(200, animations).start();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Image source={require("./DWA-logo.png")} style={styles.logo} />
         <View style={styles.headerContent}>
           <Text style={styles.title}>Jobs First Durham</Text>
           <Text style={styles.subtitle}>Search & Career Development Tools</Text>
         </View>
         <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.button}>
-            <Icon name="search" size={20} color="#222222" />
-          </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
             <Icon name="bars" size={20} color="#222222" />
           </TouchableOpacity>
@@ -58,18 +75,33 @@ export default function Homepage({ navigation }) {
 
       {/* Feature Cards */}
       <ScrollView contentContainerStyle={styles.content}>
-        {features.map((feature, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.card}
-            onPress={() => {
-              if (feature.screen) navigation.navigate(feature.screen);
-            }}
-          >
-            <Image source={feature.image} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{feature.title}</Text>
-          </TouchableOpacity>
-        ))}
+        {features.map((feature, index) => {
+          const cardStyle = {
+            opacity: animatedValues[index], // Fade in
+            transform: [
+              {
+                translateY: animatedValues[index].interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0], // Slide up from bottom
+                }),
+              },
+            ],
+          };
+
+          return (
+            <Animated.View key={index} style={[styles.card, cardStyle]}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (feature.screen) navigation.navigate(feature.screen);
+                }}
+                style={styles.cardContent}
+              >
+                <Image source={feature.image} style={styles.cardImage} />
+                <Text style={styles.cardTitle}>{feature.title}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -87,8 +119,8 @@ const styles = StyleSheet.create({
   },
   logo: { width: 50, height: 50, marginRight: 10 },
   headerContent: { flex: 1 },
-  title: { fontSize: 25, fontWeight: "bold", color: "#213E64" },
-  subtitle: { fontSize: 14, color: "#213E64", fontWeight: "bold" },
+  title: { fontSize: 30, fontWeight: "bold", color: "#213E64" },
+  subtitle: { fontSize: 17, color: "#213E64", fontWeight: "bold" },
   headerButtons: { flexDirection: "row" },
   button: {
     backgroundColor: "white",
@@ -108,12 +140,17 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
-    shadowRadius: 3,
+    shadowRadius: 5,
     elevation: 5,
-    borderColor: "#000",
+    borderColor: "black",
     borderWidth: 1,
   },
-  cardImage: { width: 168, height: 92, borderRadius: 10 },
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  cardImage: { width: 168, height: 95, borderRadius: 10 },
   cardTitle: {
     color: "#fff",
     fontSize: 17,

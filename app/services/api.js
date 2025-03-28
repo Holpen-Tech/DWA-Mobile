@@ -1,4 +1,4 @@
-const BASE_URL = 'http://172.25.89.88:3000/api'; // do make sure to include your IP address here
+const BASE_URL = 'http://YOUR_IP_ADDRESS:3000/api'; // do make sure to include your IP address here
 
 export const api = {
   jobs: {

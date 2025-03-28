@@ -1,11 +1,15 @@
-import { View, Text, StyleSheet, Container } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import {
   NavigationContainer,
   NavigationIndependentTree,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { UserProvider, UserContext } from "./contexts/UserContext";
+
 import Login from "./Screens/Login";
 import Signup from "./Screens/Signup";
 import Homepage from "./Screens/Homepage";
@@ -24,7 +28,37 @@ import CareerExplorer from "./Screens/CareerExplorer";
 
 const Stack = createStackNavigator();
 
-export default function App() {
+const AppContent = () => {
+  const { setUser } = useContext(UserContext);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await axios.get(
+            "http://192.168.2.183:3000/api/auth/validate-token",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (response.data.valid) {
+            setUser(response.data.user); // Store the user data
+          } else {
+            await AsyncStorage.removeItem("token");
+            setUser(null);
+          }
+        } catch (error) {
+          console.log("Token validation failed", error);
+          await AsyncStorage.removeItem("token");
+          setUser(null);
+        }
+      }
+    };
+
+    checkToken();
+  }, []);
+
   return (
     <NavigationIndependentTree>
       <NavigationContainer>
@@ -51,6 +85,14 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationIndependentTree>
+  );
+};
+
+export default function App() {
+  return (
+    <UserProvider>
+      <AppContent />
+    </UserProvider>
   );
 }
 
