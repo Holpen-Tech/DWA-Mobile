@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
 import {
   View,
@@ -13,6 +13,7 @@ import {
 import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Styled Components
 const Container = styled.View`
@@ -118,11 +119,45 @@ const LoginSchema = Yup.object().shape({
 export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (token) {
+          const response = await axios.get(
+            "http://192.168.0.20:3000/api/auth/verify",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data.valid) {
+            console.log("Token is valid, auto-login successful");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "MainContainer" }],
+            });
+          } else {
+            console.log("Invalid token, clearing storage");
+            await AsyncStorage.removeItem("userToken");
+          }
+        }
+      } catch (error) {
+        console.log("Token check failed:", error.message);
+        await AsyncStorage.removeItem("userToken");
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
   const handleLogin = async (values) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://YOUR_IP_ADDRESS:3000/api/auth/login", // do make sure to include your IP address here
+        "http://192.168.0.20:3000/api/auth/login",
         {
           email: values.email,
           password: values.password,
@@ -132,7 +167,13 @@ export default function LoginScreen({ navigation }) {
       if (response.data.success) {
         const token = response.data.token;
         console.log("Login successful! Token:", token);
-        navigation.navigate("MainContainer");
+
+        await AsyncStorage.setItem("userToken", token);
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "MainContainer" }],
+        });
       } else {
         Alert.alert("Error", response.data.message || "Login failed");
       }
