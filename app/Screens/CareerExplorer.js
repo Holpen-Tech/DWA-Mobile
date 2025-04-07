@@ -1,24 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Dimensions,
-  Animated,
-  Modal,
-  ActivityIndicator,
-  Alert,
-  Linking,
-} from 'react-native';
+  // Add this import at the top of the file
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Dimensions, Animated, Modal, ActivityIndicator, Alert, Linking, Image } from 'react-native';
 import { Svg, Circle, Text as SvgText, G } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { PanResponder } from 'react-native';
 import { api } from '../services/api';
 
-// List of sectors for filtering
+// Invenator (Greatness): List of sectors for filtering
 const SECTORS = [
   'Apprenticeships', 
   'Construction', 
@@ -33,10 +21,10 @@ const SECTORS = [
   'Information & Communications Technology'
 ];
 
-// Define the trending threshold
+// Invenator (Greatness): Define the trending threshold
 const TRENDING_THRESHOLD = 15;
 
-// Fallback mock data generator in case API fails
+// Invenator (Greatness): Fallback mock data generator in case API fails
 const generateMockCategories = () => {
   const categories = [
     { id: 1, name: 'Administrative', count: 12, sector: 'Service' },
@@ -51,13 +39,14 @@ const generateMockCategories = () => {
     { id: 10, name: 'Construction', count: 25, sector: 'Construction' },
   ];
 
-  // Add descriptions, skills, and salary info to each category
+  // Invenator (Greatness): Add descriptions, skills, salary info, and median salary to each category
   return categories.map(category => {
     return {
       ...category,
       description: `${category.name} are professionals who work in the ${category.sector} sector. They provide specialized services and require specific skills for their roles.`,
       skills: ['Communication', 'Teamwork', 'Problem-solving', 'Attention to detail', 'Technical expertise'],
       salary: `$${Math.floor(Math.random() * 40000) + 30000} - $${Math.floor(Math.random() * 50000) + 60000}`,
+      medianSalary: Math.floor(Math.random() * 60000) + 40000, // Random median salary for mock data
       isRelated: Math.random() > 0.7,  // Random related flag for demonstration
     };
   });
@@ -68,11 +57,11 @@ const CareerExplorer = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryJobs, setCategoryJobs] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedSector, setSelectedSector] = useState('');
+  const [selectedSectors, setSelectedSectors] = useState([]);
   const [bubbleSizeOption, setBubbleSizeOption] = useState('Equal');
+  const [showTrendingOnly, setShowTrendingOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showSectorSelector, setShowSectorSelector] = useState(false);
-  const [bubbleSizeModal, setBubbleSizeModal] = useState(false);
   const [detailsActive, setDetailsActive] = useState({
     description: false,
     skills: false,
@@ -86,19 +75,19 @@ const CareerExplorer = ({ navigation }) => {
   const [scale, setScale] = useState(1);
   const [lastScale, setLastScale] = useState(1);
   
-  // Position for each bubble
+  // Invenator (Greatness): Position for each bubble
   const [bubblePositions, setBubblePositions] = useState([]);
   
-  // Reference for SVG
+  // Invenator (Greatness): Reference for SVG
   const svgRef = useRef(null);
   const panRef = useRef(new Animated.ValueXY()).current;
 
-  // For pinch to zoom functionality
+  // Invenator (Greatness): For pinch to zoom functionality
   const initDistance = useRef(0);
   const prevDistance = useRef(0);
   const isPinching = useRef(false);
 
-  // Fetch job categories from API
+  // Invenator (Greatness): Fetch job categories from API
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -110,7 +99,7 @@ const CareerExplorer = ({ navigation }) => {
       
       const data = await api.jobs.getCategories();
       
-      // Filter out categories with very low counts if needed
+      // Invenator (Greatness): Filter out categories with very low counts if needed
       const filteredData = data.filter(cat => cat.count > 0);
       
       setCategories(filteredData);
@@ -118,13 +107,13 @@ const CareerExplorer = ({ navigation }) => {
     } catch (err) {
       console.error('Error fetching job categories:', err);
       setError('Failed to load job categories. Please try again.');
-      // Fallback to mock data if API fails
+      // Invenator (Greatness): Fallback to mock data if API fails
       setCategories(generateMockCategories());
       setLoading(false);
     }
   };
 
-  // Fetch jobs for a specific category
+  // Invenator (Greatness): Fetch jobs for a specific category
   const fetchCategoryJobs = async (categoryName) => {
     if (!categoryName) return;
     
@@ -140,18 +129,18 @@ const CareerExplorer = ({ navigation }) => {
     }
   };
 
-  // Helper to smoothly update scale for better transitions
+  // Invenator (Greatness): Helper to smoothly update scale for better transitions
   const updateScaleWithAnimation = (newScale) => {
-    // Simple direct state update - no animation needed
+    // Invenator (Greatness): Simple direct state update - no animation needed
     setScale(newScale);
     setLastScale(newScale);
   };
 
-  // Generate positions for bubbles that don't overlap
+  // Invenator (Greatness): Generate positions for bubbles that don't overlap
   useEffect(() => {
     setLoading(true);
     
-    // Use setTimeout to prevent UI from freezing during calculation
+    // Invenator (Greatness): Use setTimeout to prevent UI from freezing during calculation
     setTimeout(() => {
       const { width, height } = Dimensions.get('window');
       const centerX = width / 2;
@@ -160,7 +149,7 @@ const CareerExplorer = ({ navigation }) => {
       
       const filteredCategories = filterCategories();
       
-      // Function to check if position overlaps with existing ones
+      // Invenator (Greatness): Function to check if position overlaps with existing ones
       const doesOverlap = (x, y, radius, positions) => {
         for (const pos of positions) {
           const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
@@ -171,26 +160,32 @@ const CareerExplorer = ({ navigation }) => {
         return false;
       };
       
-      // Generate positions for each category bubble
+      // Invenator (Greatness): Generate positions for each category bubble
       filteredCategories.forEach((category, i) => {
-        // Determine radius based on bubble size option
+        // Invenator (Greatness): Determine radius based on bubble size option
         let radius;
         if (bubbleSizeOption === 'Job Openings') {
           radius = 30 + (category.count / 3); // Scale by job count
+        } else if (bubbleSizeOption === 'Median Salary') {
+          // Invenator (Greatness): Scale by median salary - normalize between 50-100
+          const minSalary = 40000; // Minimum expected salary
+          const maxSalary = 200000; // Maximum expected salary
+          const normalizedSalary = Math.min(1, Math.max(0, (category.medianSalary - minSalary) / (maxSalary - minSalary)));
+          radius = 50 + (normalizedSalary * 50); // Scale between 50-100
         } else {
           radius = 70; // Equal size for all
         }
         
-        // Cap min/max size
+        // Invenator (Greatness): Cap min/max size
         radius = Math.max(50, Math.min(radius, 100));
         
-        // Try to find non-overlapping position
+        // Invenator (Greatness): Try to find non-overlapping position
         let x, y;
         let attempts = 0;
         let placed = false;
         
         while (!placed && attempts < 100) {
-          // Spiral placement pattern
+          // Invenator (Greatness): Spiral placement pattern
           const angle = (i * 0.6) % (2 * Math.PI);
           const distance = 50 + (attempts * 15) + (i * 4);
           
@@ -205,7 +200,7 @@ const CareerExplorer = ({ navigation }) => {
           attempts++;
         }
         
-        // If we couldn't place it, just put it somewhere
+        // Invenator (Greatness): If we couldn't place it, just put it somewhere
         if (!placed) {
           x = centerX + Math.random() * width * 0.6 - width * 0.3;
           y = centerY + Math.random() * height * 0.6 - height * 0.3;
@@ -216,15 +211,15 @@ const CareerExplorer = ({ navigation }) => {
       setBubblePositions(positions);
       setLoading(false);
 
-      // Set initial scale to make bubbles more visible - add this line:
+      // Invenator (Greatness): Set initial scale to make bubbles more visible
       if (lastScale === 1 && scale === 1) {
         setScale(3);
         setLastScale(3);
       } 
     }, 100);
-  }, [categories, searchKeyword, selectedSector, bubbleSizeOption]);
+  }, [categories, searchKeyword, selectedSectors, bubbleSizeOption, showTrendingOnly]);
 
-  // Calculate distance between two touch points
+  // Invenator (Greatness): Calculate distance between two touch points
   const distance = (touches) => {
     if (touches.length < 2) return 0;
     
@@ -233,7 +228,7 @@ const CareerExplorer = ({ navigation }) => {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // Set up pan responder for dragging and zooming
+  // Invenator (Greatness): Set up pan responder for dragging and zooming
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -245,7 +240,7 @@ const CareerExplorer = ({ navigation }) => {
         });
         panRef.setValue({ x: 0, y: 0 });
         
-        // Initialize pinch gesture
+        // Invenator (Greatness): Initialize pinch gesture
         if (evt.nativeEvent.touches.length === 2) {
           const dist = distance(evt.nativeEvent.touches);
           initDistance.current = dist;
@@ -255,7 +250,7 @@ const CareerExplorer = ({ navigation }) => {
         }
       },
       onPanResponderMove: (evt, gestureState) => {
-        // Handle pinch to zoom
+        // Invenator (Greatness): Handle pinch to zoom
         if (evt.nativeEvent.touches.length === 2) {
           const dist = distance(evt.nativeEvent.touches);
           
@@ -264,15 +259,15 @@ const CareerExplorer = ({ navigation }) => {
             return;
           }
           
-          // Calculate scaling factor by comparing with initial distance
+          // Invenator (Greatness): Calculate scaling factor by comparing with initial distance
           const scaleDelta = dist / initDistance.current;
           
-          // Increase max zoom limit from 3 to 5
+          // Invenator (Greatness): Increase max zoom limit from 3 to 5
           const newScale = Math.max(0.5, Math.min(5, lastScale * scaleDelta));
           
           setScale(newScale);
         } 
-        // Handle panning when not pinching
+        // Invenator (Greatness): Handle panning when not pinching
         else if (!isPinching.current) {
           panRef.setValue({
             x: gestureState.dx,
@@ -281,12 +276,12 @@ const CareerExplorer = ({ navigation }) => {
         }
       },
       onPanResponderRelease: () => {
-        // Only update lastScale if we were actually pinching
+        // Invenator (Greatness): Only update lastScale if we were actually pinching
         if (isPinching.current) {
           setLastScale(scale);
         }
         
-        // Reset pinch state
+        // Invenator (Greatness): Reset pinch state
         initDistance.current = 0;
         isPinching.current = false;
         
@@ -295,50 +290,54 @@ const CareerExplorer = ({ navigation }) => {
     })
   ).current;
 
-  // Reference for tracking double taps
+  // Invenator (Greatness): Reference for tracking double taps
   const lastTapTimeRef = useRef(0);
   const doubleTapTimeout = useRef(null);
 
-  // Function to handle double tap reset
+  // Invenator (Greatness): Function to handle double tap reset
   const handleDoubleTap = (event) => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
     
     if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
-      // Clear pending single-tap actions
+      // Invenator (Greatness): Clear pending single-tap actions
       clearTimeout(doubleTapTimeout.current);
       
-      // Reset zoom and position directly without animation
+      // Invenator (Greatness): Reset zoom and position directly without animation
       setScale(1.5); // Reset to default enlarged view, not 1
       setLastScale(1.5);
       panRef.setValue({ x: 0, y: 0 });
     } else {
-      // Set up to detect second tap
+      // Invenator (Greatness): Set up to detect second tap
       lastTapTimeRef.current = now;
       
-      // Use timeout to separate single taps from double taps
+      // Invenator (Greatness): Use timeout to separate single taps from double taps
       doubleTapTimeout.current = setTimeout(() => {
         // This was a single tap, no action needed
       }, DOUBLE_TAP_DELAY);
     }
   };
 
-  // Filter categories based on search and sector filter
+  // Invenator (Greatness): Filter categories based on search, sector filter, and trending status
   const filterCategories = () => {
     return categories.filter(category => {
-      // Apply search filter
+      // Invenator (Greatness): Apply search filter
       const matchesSearch = searchKeyword === '' || 
         category.name.toLowerCase().includes(searchKeyword.toLowerCase());
       
-      // Apply sector filter
-      const matchesSector = selectedSector === '' || 
-        category.sector === selectedSector;
+      // Invenator (Greatness): Apply sector filter (multiple sectors)
+      const matchesSector = selectedSectors.length === 0 || 
+        selectedSectors.includes(category.sector);
       
-      return matchesSearch && matchesSector;
+      // Invenator (Greatness): Apply trending filter if enabled
+      const matchesTrending = !showTrendingOnly || 
+        category.count >= TRENDING_THRESHOLD;
+      
+      return matchesSearch && matchesSector && matchesTrending;
     });
   };
 
-  // Handle category selection
+  // Invenator (Greatness): Handle category selection
   const handleCategorySelect = (category) => {
     if (category.id === selectedCategory?.id) {
       setSelectedCategory(null);
@@ -349,37 +348,41 @@ const CareerExplorer = ({ navigation }) => {
     }
   };
 
-  // Toggle filter view
+  // Invenator (Greatness): Toggle filter view
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
-  // Open sector selector modal
-  const openSectorSelector = () => {
-    setShowSectorSelector(true);
+  // Invenator (Greatness): Toggle sectors in multi-select
+  const toggleSector = (sector) => {
+    if (selectedSectors.includes(sector)) {
+      setSelectedSectors(selectedSectors.filter(s => s !== sector));
+    } else {
+      setSelectedSectors([...selectedSectors, sector]);
+    }
   };
 
-  // Open bubble size selector modal
-  const toggleBubbleSizeModal = () => {
-    setBubbleSizeModal(!bubbleSizeModal);
+  // Invenator (Greatness): Toggle trending filter to show only in-demand job categories
+  const toggleTrending = () => {
+    setShowTrendingOnly(!showTrendingOnly);
   };
 
-  // Set bubble size option
+  // Invenator (Greatness): Set bubble size option
   const selectBubbleSize = (option) => {
     setBubbleSizeOption(option);
-    setBubbleSizeModal(false);
   };
 
-  // Reset all filters
+  // Invenator (Greatness): Reset all filters
   const resetFilters = () => {
     setSearchKeyword('');
-    setSelectedSector('');
+    setSelectedSectors([]);
     setBubbleSizeOption('Equal');
+    setShowTrendingOnly(false);
     setScale(1);
     setLastScale(1);
   };
   
-  // Toggle detail sections
+  // Invenator (Greatness): Toggle detail sections
   const toggleDetailSection = (section) => {
     setDetailsActive({
       ...detailsActive,
@@ -387,15 +390,15 @@ const CareerExplorer = ({ navigation }) => {
     });
   };
 
-  // function to wrap text within the cluster "bubbles"
+  // Invenator (Greatness): function to wrap text within the cluster "bubbles"
   const wrapText = (text, radius) => {
     if (!text) return [];
     
-    // Calculate max chars per line based on radius
+    // Invenator (Greatness): Calculate max chars per line based on radius
     // Approximate 6px per character for average font
     const maxCharsPerLine = Math.floor(radius / 4);
     
-    // Don't wrap very short text
+    // Invenator (Greatness): Don't wrap very short text
     if (text.length <= maxCharsPerLine) return [text];
     
     const words = text.split(' ');
@@ -403,17 +406,17 @@ const CareerExplorer = ({ navigation }) => {
     let currentLine = '';
     
     words.forEach(word => {
-      // Test if adding this word exceeds the max line length
+      // Invenator (Greatness): Test if adding this word exceeds the max line length
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       
       if (testLine.length <= maxCharsPerLine) {
         currentLine = testLine;
       } else {
-        // If currentLine is not empty, push it and start a new line
+        // Invenator (Greatness): If currentLine is not empty, push it and start a new line
         if (currentLine) {
           lines.push(currentLine);
         }
-        // If the word itself is too long, truncate it
+        // Invenator (Greatness): If the word itself is too long, truncate it
         if (word.length > maxCharsPerLine) {
           currentLine = word.substring(0, maxCharsPerLine-3) + '...';
         } else {
@@ -422,12 +425,12 @@ const CareerExplorer = ({ navigation }) => {
       }
     });
     
-    // Add the last line
+    // Invenator (Greatness): Add the last line
     if (currentLine) {
       lines.push(currentLine);
     }
     
-    // Limit to 3 lines maximum
+    // Invenator (Greatness): Limit to 3 lines maximum
     if (lines.length > 3) {
       lines.splice(3);
       const lastLine = lines[2];
@@ -441,14 +444,14 @@ const CareerExplorer = ({ navigation }) => {
     return lines;
   };
 
-  // Format date for job cards
+  // Invenator (Greatness): Format date for job cards
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
 
-  // Handle job click to open URL
+  // Invenator (Greatness): Handle job click to open URL
   const handleJobClick = (url) => {
     if (!url) return;
     
@@ -463,7 +466,7 @@ const CareerExplorer = ({ navigation }) => {
       .catch(err => console.error('Error opening URL:', err));
   };
 
-  // Render job card for the category detail section
+  // Invenator (Greatness): Render job card for the category detail section
   const renderJobCard = (job) => {
     const jobType = job.type === 'PT' ? 'Part Time' : 'Full Time';
     const location = job.location || 'Location not specified';
@@ -484,87 +487,9 @@ const CareerExplorer = ({ navigation }) => {
     );
   };
 
-  // Sector selector component
-  const SectorSelector = ({ 
-    visible, 
-    sectors, 
-    selectedSector, 
-    onSelectSector, 
-    onClose 
-  }) => {
-    return (
-      <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-        onRequestClose={onClose}
-      >
-        <TouchableOpacity 
-          activeOpacity={1} 
-          style={styles.modalOverlay}
-          onPress={onClose}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Sector</Text>
-              <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={24} color="#213E64" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.sectorList}>
-              <TouchableOpacity
-                style={[
-                  styles.sectorItem,
-                  selectedSector === '' && styles.selectedSector
-                ]}
-                onPress={() => {
-                  onSelectSector('');
-                  onClose();
-                }}
-              >
-                <Text style={[
-                  styles.sectorText,
-                  selectedSector === '' && styles.selectedSectorText
-                ]}>
-                  Show All Sectors
-                </Text>
-                {selectedSector === '' && (
-                  <Ionicons name="checkmark" size={18} color="#649A47" />
-                )}
-              </TouchableOpacity>
-              
-              {sectors.map((sector) => (
-                <TouchableOpacity
-                  key={sector}
-                  style={[
-                    styles.sectorItem,
-                    selectedSector === sector && styles.selectedSector
-                  ]}
-                  onPress={() => {
-                    onSelectSector(sector);
-                    onClose();
-                  }}
-                >
-                  <Text style={[
-                    styles.sectorText,
-                    selectedSector === sector && styles.selectedSectorText
-                  ]}>
-                    {sector}
-                  </Text>
-                  {selectedSector === sector && (
-                    <Ionicons name="checkmark" size={18} color="#649A47" />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    );
-  };
+  // Removed SectorSelector component as it's no longer needed with the in-modal multi-select approach
 
-  // Error component for when data fetching fails
+  // Invenator (Greatness): Error component for when data fetching fails
   const ErrorView = ({ message, onRetry }) => (
     <View style={styles.errorContainer}>
       <Text style={styles.errorText}>{message}</Text>
@@ -577,15 +502,16 @@ const CareerExplorer = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        {/* Top row with back button and title */}
+        {/* Invenator (Greatness): Top row with back button, title and logo */}
         <View style={styles.headerTopRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#213E64" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Career Explorer</Text>
+          <Image source={require("./DWA-logo.png")} style={styles.logo} />
         </View>
         
-        {/* Search and Filter row */}
+        {/* Invenator (Greatness): Search and Filter row */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
             <Ionicons name="search" size={16} color="#666" style={styles.searchIcon} />
@@ -607,10 +533,20 @@ const CareerExplorer = ({ navigation }) => {
               <Ionicons name="funnel" size={14} color="#fff" />
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterButton, showTrendingOnly && styles.activeFilterButton]}
+            onPress={toggleTrending}
+          >
+            <View style={styles.buttonContent}>
+              <Text style={styles.filterText}>Trending</Text>
+              <Ionicons name="trending-up" size={14} color="#fff" />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Filters Modal */}
+      {/* Invenator (Greatness): Filters Modal */}
       <Modal
         visible={showFilters}
         transparent={true}
@@ -634,18 +570,15 @@ const CareerExplorer = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            {/* Sector Filter Section - now a direct selector in the popup */}
+            {/* Invenator (Greatness): Sector Filter Section - multi-select checkboxes */}
             <Text style={styles.filterLabel}>FILTER BY SECTOR</Text>
             <ScrollView style={styles.sectorScrollView}>
               <TouchableOpacity
-                style={[
-                  styles.sectorOption,
-                  selectedSector === '' && styles.selectedSectorOption
-                ]}
-                onPress={() => setSelectedSector('')}
+                style={styles.sectorOption}
+                onPress={() => setSelectedSectors([])}
               >
                 <Text style={styles.sectorText}>Show All Sectors</Text>
-                {selectedSector === '' && (
+                {selectedSectors.length === 0 && (
                   <Ionicons name="checkmark" size={18} color="#649A47" />
                 )}
               </TouchableOpacity>
@@ -655,29 +588,69 @@ const CareerExplorer = ({ navigation }) => {
                   key={sector}
                   style={[
                     styles.sectorOption,
-                    selectedSector === sector && styles.selectedSectorOption
+                    selectedSectors.includes(sector) && styles.selectedSectorOption
                   ]}
-                  onPress={() => setSelectedSector(sector)}
+                  onPress={() => toggleSector(sector)}
                 >
                   <Text style={styles.sectorText}>{sector}</Text>
-                  {selectedSector === sector && (
-                    <Ionicons name="checkmark" size={18} color="#649A47" />
-                  )}
+                  <View style={styles.checkboxContainer}>
+                    <View style={[
+                      styles.checkbox,
+                      selectedSectors.includes(sector) && styles.checkboxSelected
+                    ]}>
+                      {selectedSectors.includes(sector) && (
+                        <Ionicons name="checkmark" size={14} color="#fff" />
+                      )}
+                    </View>
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
-            {/* Bubble Size Options Section */}
+            {/* Invenator (Greatness): Bubble Size Options Section - redesigned as a list */}
             <Text style={styles.filterLabel}>BUBBLE SIZE OPTIONS</Text>
-            <TouchableOpacity
-              style={styles.dropdownSelector}
-              onPress={toggleBubbleSizeModal}
-            >
-              <Text>Size by {bubbleSizeOption}</Text>
-              <Ionicons name="chevron-down" size={20} color="#213E64" />
-            </TouchableOpacity>
+            <View style={styles.bubbleSizeOptions}>
+              <TouchableOpacity
+                style={[
+                  styles.bubbleSizeOption,
+                  bubbleSizeOption === 'Equal' && styles.selectedBubbleSizeOption
+                ]}
+                onPress={() => selectBubbleSize('Equal')}
+              >
+                <Text style={styles.bubbleSizeText}>Equal Size</Text>
+                {bubbleSizeOption === 'Equal' && (
+                  <Ionicons name="checkmark" size={18} color="#649A47" />
+                )}
+              </TouchableOpacity>
 
-            {/* Button Row */}
+              <TouchableOpacity
+                style={[
+                  styles.bubbleSizeOption,
+                  bubbleSizeOption === 'Job Openings' && styles.selectedBubbleSizeOption
+                ]}
+                onPress={() => selectBubbleSize('Job Openings')}
+              >
+                <Text style={styles.bubbleSizeText}>Size by Job Openings</Text>
+                {bubbleSizeOption === 'Job Openings' && (
+                  <Ionicons name="checkmark" size={18} color="#649A47" />
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.bubbleSizeOption,
+                  bubbleSizeOption === 'Median Salary' && styles.selectedBubbleSizeOption
+                ]}
+                onPress={() => selectBubbleSize('Median Salary')}
+              >
+                <Text style={styles.bubbleSizeText}>Size by Median Salary</Text>
+                {bubbleSizeOption === 'Median Salary' && (
+                  <Ionicons name="checkmark" size={18} color="#649A47" />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Invenator (Greatness): Button Row */}
             <View style={styles.modalButtons}>
               <TouchableOpacity 
                 style={styles.applyButton}
@@ -699,78 +672,9 @@ const CareerExplorer = ({ navigation }) => {
         </TouchableOpacity>
       </Modal>
 
-      {/* Sector Selector Modal */}
-      <SectorSelector
-        visible={showSectorSelector}
-        sectors={SECTORS}
-        selectedSector={selectedSector}
-        onSelectSector={setSelectedSector}
-        onClose={() => setShowSectorSelector(false)}
-      />
+      {/* No longer needed with the new multi-select approach */}
 
-      {/* Bubble Size Selector Modal */}
-      <Modal
-        visible={bubbleSizeModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setBubbleSizeModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Bubble Size Options</Text>
-              <TouchableOpacity onPress={() => setBubbleSizeModal(false)}>
-                <Ionicons name="close" size={24} color="#213E64" />
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                bubbleSizeOption === 'Equal' && styles.selectedOption
-              ]}
-              onPress={() => selectBubbleSize('Equal')}
-            >
-              <Text style={styles.modalOptionText}>Equal Size</Text>
-              {bubbleSizeOption === 'Equal' && (
-                <Ionicons name="checkmark" size={20} color="#649A47" />
-              )}
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                bubbleSizeOption === 'Job Openings' && styles.selectedOption
-              ]}
-              onPress={() => selectBubbleSize('Job Openings')}
-            >
-              <Text style={styles.modalOptionText}>By Job Openings</Text>
-              {bubbleSizeOption === 'Job Openings' && (
-                <Ionicons name="checkmark" size={20} color="#649A47" />
-              )}
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                bubbleSizeOption === 'Median Salary' && styles.selectedOption,
-                styles.disabledOption
-              ]}
-              onPress={() => {
-                // This option is disabled as mentioned in requirements
-                Alert.alert('Median Salary data will be available in future updates.');
-              }}
-            >
-              <Text style={[
-                styles.modalOptionText,
-                styles.disabledOptionText
-              ]}>By Median Salary (Coming Soon)</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Main Content Area */}
+      {/* Invenator (Greatness): Main Content Area */}
       {error ? (
         <ErrorView message={error} onRetry={fetchCategories} />
       ) : (
@@ -811,16 +715,16 @@ const CareerExplorer = ({ navigation }) => {
                   const isSelected = selectedCategory?.id === pos.category.id;
                   const isRelated = selectedCategory && pos.category.isRelated && selectedCategory.id !== pos.category.id;
                   
-                  // Calculate appropriate text size based on radius
+                  // Invenator (Greatness): Calculate appropriate text size based on radius
                   const baseFontSize = Math.min(pos.radius / 2, 800 / pos.category.name.length);
                   const fontSize = Math.min(baseFontSize, 16); // Cap font size
                   
-                  // Get wrapped text lines
+                  // Invenator (Greatness): Get wrapped text lines
                   const textLines = wrapText(pos.category.name, pos.radius);
                   
                   return (
                     <G key={index}>
-                      {/* Background fill circle */}
+                      {/* Invenator (Greatness): Background fill circle */}
                       <Circle
                         cx={pos.x}
                         cy={pos.y}
@@ -829,7 +733,7 @@ const CareerExplorer = ({ navigation }) => {
                         stroke="none"
                       />
                       
-                      {/* Main Circle border */}
+                      {/* Invenator (Greatness): Main Circle border */}
                       <Circle
                         cx={pos.x}
                         cy={pos.y}
@@ -841,9 +745,9 @@ const CareerExplorer = ({ navigation }) => {
                         onPress={() => handleCategorySelect(pos.category)}
                       />
                       
-                      {/* Render wrapped text lines */}
+                      {/* Invenator (Greatness): Render wrapped text lines */}
                       {textLines.map((line, lineIndex) => {
-                        // Calculate vertical position for each line
+                        // Invenator (Greatness): Calculate vertical position for each line
                         const lineCount = textLines.length;
                         const lineHeight = fontSize * 1.2; // Add some line spacing
                         const totalHeight = lineCount * lineHeight;
@@ -867,7 +771,7 @@ const CareerExplorer = ({ navigation }) => {
                         );
                       })}
                       
-                      {/* Count Bubble */}
+                      {/* Invenator (Greatness): Count Bubble */}
                       <Circle
                         cx={pos.x}
                         cy={pos.y + pos.radius - 16}
@@ -875,7 +779,7 @@ const CareerExplorer = ({ navigation }) => {
                         fill="#649A47"
                       />
                       
-                      {/* Count Text */}
+                      {/* Invenator (Greatness): Count Text */}
                       <SvgText
                         x={pos.x}
                         y={pos.y + pos.radius - 16}
@@ -897,21 +801,35 @@ const CareerExplorer = ({ navigation }) => {
         </View>
       )}
 
-      {/* Details Section - Now Scrollable */}
+      {/* Invenator (Greatness): Details Section - Now Scrollable */}
       {selectedCategory && (
         <ScrollView style={styles.detailsScrollContainer}>
           <View style={styles.detailsContainer}>
             <View style={styles.detailsHeader}>
-              <Text style={styles.detailsTitle}>{selectedCategory.name}</Text>
+              <View style={styles.detailsTitleContainer}>
+                <Text style={styles.detailsTitle}>
+                  {selectedCategory.name}
+                  {selectedCategory.nocCodes && selectedCategory.nocCodes.length > 0 && 
+                    ` (${selectedCategory.nocCodes[0]})`}
+                </Text>
+              </View>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setSelectedCategory(null)}
               >
                 <Ionicons name="close" size={24} color="#213E64" />
               </TouchableOpacity>
-            </View>            
+            </View>  
+            
+            {/* Invenator (Greatness): Trending indicator strip */}
+            {selectedCategory.count >= TRENDING_THRESHOLD && (
+              <View style={styles.trendingStrip}>
+                <Ionicons name="star" size={18} color="#fff" />
+                <Text style={styles.trendingText}>This job category is in demand</Text>
+              </View>
+            )}          
 
-            {/* Jobs Section - New Expandable Section */}
+            {/* Invenator (Greatness): Jobs Section - New Expandable Section */}
             <TouchableOpacity
               style={styles.detailSection}
               onPress={() => toggleDetailSection('jobs')}
@@ -998,54 +916,7 @@ const CareerExplorer = ({ navigation }) => {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.detailSection}
-              onPress={() => toggleDetailSection('codes')}
-            >
-              <View style={styles.detailSectionHeader}>
-                <Text style={styles.detailSectionTitle}>Classification Codes</Text>
-                <Ionicons
-                  name={detailsActive.codes ? "chevron-up" : "chevron-down"}
-                  size={20}
-                  color="#213E64"
-                />
-              </View>
-              {detailsActive.codes && (
-                <View>
-                  {selectedCategory.nocCodes && selectedCategory.nocCodes.length > 0 && (
-                    <View style={styles.codeSection}>
-                      <Text style={styles.codeTitle}>NOC Codes:</Text>
-                      <View style={styles.codesList}>
-                        {selectedCategory.nocCodes.slice(0, 5).map((code, index) => (
-                          <View key={index} style={styles.codeItem}>
-                            <Text style={styles.codeText}>{code}</Text>
-                          </View>
-                        ))}
-                        {selectedCategory.nocCodes.length > 5 && (
-                          <Text style={styles.moreCodesText}>+{selectedCategory.nocCodes.length - 5} more</Text>
-                        )}
-                      </View>
-                    </View>
-                  )}
-                  
-                  {selectedCategory.naicsCodes && selectedCategory.naicsCodes.length > 0 && (
-                    <View style={styles.codeSection}>
-                      <Text style={styles.codeTitle}>NAICS Codes:</Text>
-                      <View style={styles.codesList}>
-                        {selectedCategory.naicsCodes.slice(0, 5).map((code, index) => (
-                          <View key={index} style={styles.codeItem}>
-                            <Text style={styles.codeText}>{code}</Text>
-                          </View>
-                        ))}
-                        {selectedCategory.naicsCodes.length > 5 && (
-                          <Text style={styles.moreCodesText}>+{selectedCategory.naicsCodes.length - 5} more</Text>
-                        )}
-                      </View>
-                    </View>
-                  )}
-                </View>
-              )}
-            </TouchableOpacity>
+            {/* Classification Codes section removed */}
           </View>
         </ScrollView>
       )}
@@ -1062,42 +933,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    paddingTop: 50, 
-    paddingBottom: 10,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
   backButton: {
     marginRight: 10,
+    zIndex: 2, // Ensure it's above the title
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#213E64',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center', // Center the text
+    zIndex: 1, // Ensure it's above other elements
   },
   headerButtons: {
     flexDirection: 'row',
   },
   headerContainer: {
     backgroundColor: '#FFFFFF',
-    paddingTop: 40, // Reduced from 50 to give more viewing area
-    paddingBottom: 10,
+    paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
   headerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    position: 'relative', // For absolute positioning of children
   },
   headerButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
+  },
+  logo: {
+    width: 35,
+    height: 35,
+    marginLeft: 'auto', // Push to the right edge
+    zIndex: 2, // Ensure it's above the title
   },
   searchContainer: {
     flexDirection: 'row',
@@ -1107,26 +989,31 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   searchInputContainer: {
-    flex: 1,
+    flex: 1, // Restored to take available space
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
-    height: 35,
-  },
-  searchIcon: {
-    paddingHorizontal: 10,
+    height: 35, // Return to original height
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     color: '#213E64',
     height: '100%',
+    textAlignVertical: 'center', // Helps with cursor alignment
   },
-  backButton: {
-    marginRight: 10,
+  searchIcon: {
+    paddingHorizontal: 10,
+    alignSelf: 'center', // Center vertically in container
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#213E64',
+    height: '100%',
   },
   filterButton: {
     backgroundColor: '#213E64',
@@ -1137,7 +1024,7 @@ const styles = StyleSheet.create({
   filterText: {
     color: '#fff',
     fontWeight: 'bold',
-    marginRight: 4, // Add space between icon and text
+    fontSize: 13,
   },
   filterButtonText: {
     marginLeft: 5,
@@ -1278,7 +1165,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
-  // Updated scrollable details section
+  // Invenator (Greatness): Updated scrollable details section
   detailsScrollContainer: {
     maxHeight: 350, // Increased max height to accommodate more content
     backgroundColor: '#FFFFFF',
@@ -1290,12 +1177,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start', // Changed from 'center' to 'flex-start' to align with top
     marginBottom: 15,
+  },
+  detailsTitleContainer: {
+    flex: 1,
+    paddingRight: 10, // Added padding to prevent text from pushing close button
   },
   detailsTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#213E64',
+    flexWrap: 'wrap', // Added to ensure text wraps
   },
   detailsSubtitle: {
     fontSize: 14,
@@ -1357,7 +1252,7 @@ const styles = StyleSheet.create({
     color: '#649A47',
     fontSize: 12,
   },
-  // Job listing styles
+  // Invenator (Greatness): Job listing styles
   jobsList: {
     marginTop: 5,
   },
@@ -1417,7 +1312,7 @@ const styles = StyleSheet.create({
     color: '#649A47',
     fontWeight: 'bold',
   },
-  // Modal related styles
+  // Invenator (Greatness): Modal related styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -1516,7 +1411,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    maxHeight: '80%', // Ensure it doesn't get too tall
+    maxHeight: '90%', // Increased to accommodate the bubble size options
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1550,7 +1445,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   clearButton: {
-    backgroundColor: '#649A47',
+    backgroundColor: '#ff3b30', // Changed from green to red to match JobBoard.js
     padding: 10,
     borderRadius: 5,
     flex: 1,
@@ -1564,6 +1459,40 @@ const styles = StyleSheet.create({
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
+  },
+  activeFilterButton: {
+    backgroundColor: '#D54128', // Highlighting active trending filter
+  },
+  checkboxContainer: {
+    marginLeft: 'auto',
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#213E64',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: '#213E64',
+  },
+  trendingStrip: {
+    backgroundColor: '#D54128',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10, // Matches the trending/filters buttons radius
+    marginBottom: 15,
+    gap: 8,
+  },
+  trendingText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
   },
   sectorScrollView: {
     maxHeight: 200, // Limit height so it doesn't take up too much space
@@ -1580,7 +1509,23 @@ const styles = StyleSheet.create({
   selectedSectorOption: {
     backgroundColor: '#F0F7EC',
   },
-  sectorText: {
+  // Invenator (Greatness): New Bubble Size Options styles
+  bubbleSizeOptions: {
+    marginBottom: 15,
+  },
+  bubbleSizeOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  selectedBubbleSizeOption: {
+    backgroundColor: '#F0F7EC',
+  },
+  bubbleSizeText: {
     fontSize: 16,
     color: '#333333',
   },

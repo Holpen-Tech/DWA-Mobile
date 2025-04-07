@@ -47,7 +47,7 @@ export default function JobBoard({ navigation }) {
   ];
 
   const fetchJobs = () => {
-    return fetch("http://YOUR_IP_ADDRESS:3000/api/jobs")
+    return fetch("http://192.168.2.206:3000/api/jobs")
       .then((response) => response.json())
       .then((data) => {
         setJobData(data);
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "white",
   },
-  logo: { width: 40, height: 40, marginRight: 10 },
+  logo: { width: 35, height: 35, marginRight: 10 },
   title: {
     fontSize: 25,
     fontWeight: "bold",
