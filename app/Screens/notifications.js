@@ -1,189 +1,237 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  StyleSheet, 
   SafeAreaView,
-  TouchableOpacity,
-  FlatList,
   Image,
-  StatusBar,
+  TouchableOpacity
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Sample notification data
-const notificationData = [
+const notifications = [
   {
     id: "1",
-    message:
-      "Associate job openings increased by 8% this past week. Explore more career insight",
-    time: "2h",
+    type: "info",
+    message: "New job available: Web Developer",
+    time: "2h ago",
+    read: false
   },
   {
     id: "2",
-    message:
-      "Associate job openings increased by 8% this past week. Explore more career insight",
-    time: "5h",
+    type: "success",
+    message: "Job successfully saved: UX Designer",
+    time: "3h ago",
+    read: true
   },
   {
     id: "3",
-    message:
-      "Associate job openings increased by 8% this past week. Explore more career insight",
-    time: "6h",
+    type: "info",
+    message: "New job available: Data Analyst",
+    time: "5h ago",
+    read: false
   },
   {
     id: "4",
-    message:
-      "Associate job openings increased by 8% this past week. Explore more career insight",
-    time: "12h",
+    type: "success",
+    message: "Job successfully saved: Marketing Coordinator",
+    time: "1d ago",
+    read: true
   },
   {
     id: "5",
-    message:
-      "Associate job openings increased by 8% this past week. Explore more career insight",
-    time: "22h",
+    type: "success",
+    message: "Your saved job 'Product Manager at InnovateCo' has been updated",
+    time: "2d ago",
+    read: true
   },
+  {
+    id: "6",
+    type: "alert",
+    message: "Complete your profile to get 30% more job matches",
+    time: "1w ago",
+    read: true
+  },
+  {
+    id: "7",
+    type: "info",
+    message: "5 new Data Analyst positions matching your skills",
+    time: "1w ago",
+    read: true
+  },
+  {
+    id: "8",
+    type: "info",
+    message: "New featured job: Mobile App Developer at AppWorks",
+    time: "2w ago",
+    read: false
+  },
+
 ];
 
-// Render a single notification item
-const NotificationItem = ({ item }) => {
-  return (
-    <View style={styles.notificationItem}>
-      <View style={styles.avatarContainer}>
-        <View style={styles.avatar}>
-          <Feather name="user" size={20} color="black" />
-        </View>
-      </View>
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationText}>{item.message}</Text>
-      </View>
-      <View style={styles.notificationMeta}>
-        <Text style={styles.timeText}>{item.time}</Text>
-        <TouchableOpacity style={styles.moreButton}>
-          <Feather name="more-vertical" size={16} color="gray" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
+const Notification = ({ navigation }) => {
+  const renderItem = ({ item }) => {
+    const icon = item.type === "success" ? "check-circle" : "info-circle";
+    const iconColor = item.type === "success" ? "#4CAF50" : "#2196F3";
+    const cardStyle = item.read ? styles.card : [styles.card, styles.unreadCard];
 
-export default function Notifications({ navigation }) {
+    return (
+      <TouchableOpacity 
+        style={cardStyle}
+        activeOpacity={0.7}
+      >
+        <Icon name={icon} size={22} color={iconColor} style={styles.icon} />
+        <View style={styles.textContainer}>
+          <Text style={styles.message}>{item.message}</Text>
+          <Text style={styles.timestamp}>{item.time}</Text>
+        </View>
+        {!item.read && <View style={styles.unreadIndicator} />}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("./DWA-logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={['#213E64', '#1A4B8C']}
+        style={styles.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <Image
+          source={require("./DWA-logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.headerTitle}>Notifications</Text>
-        <View style={styles.headerIcons}>
+        <View style={styles.iconsContainer}>
           <TouchableOpacity style={styles.iconButton}>
-            <Feather name="search" size={22} color="black" />
+            <Icon name="search" size={20} color="#FFF" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Feather name="menu" size={22} color="black" />
+            <Icon name="bars" size={20} color="#FFF" />
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
 
       {/* Notification List */}
-      <FlatList
-        data={notificationData}
-        renderItem={({ item }) => <NotificationItem item={item} />}
-        keyExtractor={(item) => item.id}
-        style={styles.notificationList}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {/* Bottom padding to account for your navigation bar */}
-      <View style={{ height: 20 }} />
+      <View style={styles.content}>
+        <FlatList
+          data={notifications}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Icon name="bell-slash" size={40} color="#ccc" />
+              <Text style={styles.emptyText}>No notifications yet</Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#F5F7FA",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  logoContainer: {
-    width: 40,
-    height: 40,
+    padding: 20,
+    paddingTop: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
   },
   logo: {
-    width: "100%",
-    height: "100%",
+    width: 80,
+    height: 40,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#14304d",
     flex: 1,
-    marginLeft: 8,
+    fontSize: 30,
+    fontWeight: "600",
+    color: "#FFF",
+    marginLeft: 15,
   },
-  headerIcons: {
+  iconsContainer: {
     flexDirection: "row",
   },
   iconButton: {
-    padding: 8,
-    marginLeft: 8,
+    marginLeft: 20,
   },
-  notificationList: {
+  content: {
     flex: 1,
+    padding: 15,
   },
-  notificationItem: {
+  listContent: {
+    paddingBottom: 20,
+  },
+  card: {
     flexDirection: "row",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  avatarContainer: {
-    marginRight: 12,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 18,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    height: 90, // Fixed height for all cards
+    overflow: 'hidden', // Ensures content doesn't overflow
   },
-  notificationContent: {
+  unreadCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#213E64",
+  },
+  icon: {
+    marginRight: 15,
+  },
+  textContainer: {
     flex: 1,
-    paddingRight: 8,
+    justifyContent: 'center', // Vertically center the text
+    height: '100%', // Take full height of parent
   },
-  notificationText: {
-    fontSize: 14,
-    lineHeight: 20,
+  message: {
+    fontSize: 16,
+    fontWeight: "500",
     color: "#333",
+    marginBottom: 4,
   },
-  notificationMeta: {
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    paddingLeft: 8,
-    width: 50,
+  timestamp: {
+    fontSize: 13,
+    color: "#888",
+    marginTop: 4, // Add some space between message and timestamp
   },
-  timeText: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
+  unreadIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#213E64",
+    marginLeft: 10,
   },
-  moreButton: {
-    padding: 4,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#888",
+    marginTop: 10,
   },
 });
+
+export default Notification;

@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 25,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -166,12 +166,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   logo: {
-    width: 100,
+    width: 80,
     height: 40,
   },
   headerTitle: {
     flex: 1,
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: "600",
     color: "#FFF",
     marginLeft: 15,
