@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "extra": {
-      "MAPBOX_ACCESS_TOKEN": "sk.eyJ1IjoiaG9scGVuLXRlY2giLCJhIjoiY203czlwMjY4MWlsMTJ3cTA0cHFtMm16ZyJ9.LxH0_cEWdEYkOw9tIjwmhA",
+      "GOOGLE_MAPS_API_KEY":"AIzaSyDuzyrFSy2LjlO5aKUlWssmG65j7Xvn2IM",
       "router": {
         "origin": false
       },
