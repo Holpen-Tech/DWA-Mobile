@@ -533,6 +533,21 @@ const CareerExplorer = ({ navigation }) => {
               <Ionicons name="funnel" size={14} color="#fff" />
             </View>
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>Career Explorer</Text>
+        </View>
+        
+        {/* Search and Filter row */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={16} color="#666" style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search by Keyword..."
+              style={styles.searchInput}
+              value={searchKeyword}
+              onChangeText={setSearchKeyword}
+              placeholderTextColor="#666"
+            />
+          </View>
 
           <TouchableOpacity
             style={[styles.filterButton, showTrendingOnly && styles.activeFilterButton]}

@@ -157,7 +157,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://YOUR_IP_ADDRESS:3000/api/auth/login", // do make sure to include your IP address here
+        "http://YOUR_IP_ADDRESS:3000/api/auth/login",
         {
           email: values.email,
           password: values.password,

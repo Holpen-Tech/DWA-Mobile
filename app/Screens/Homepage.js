@@ -14,10 +14,18 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { LinearGradient } from "expo-linear-gradient";
+import Sidebar from "./sideBar";
 
 export default function Homepage({ navigation }) {
   const [activeFeature, setActiveFeature] = useState(null);
   const [searchText, setSearchText] = useState("");
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
 
   const features = [
     {
@@ -122,6 +130,11 @@ export default function Homepage({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <View style={styles.container}>
+
+         {/* Sidebar Component */}
+       {isSidebarOpen && <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}
+
+
         {/* Header with Gradient */}
         <LinearGradient
           colors={["#213E64", "#356599"]}
@@ -137,10 +150,10 @@ export default function Homepage({ navigation }) {
               </Text>
             </View>
             <View style={styles.headerButtons}>
-              <TouchableOpacity style={styles.profileButton}>
+              <TouchableOpacity style={styles.profileButton}  onPress={() => navigation.navigate("UserProfile")}>
                 <Icon name="user-circle" size={24} color="#FFF" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity style={styles.button} onPress={toggleSidebar}>
                 <Icon name="bars" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>

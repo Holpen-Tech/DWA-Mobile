@@ -25,7 +25,30 @@ import MainContainer from "./Screens/MainContainer";
 import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
-import WelcomeScreen from "./Screens/WelcomeScreen";
+
+import sideBar from "./Screens/sideBar";
+import UserProfile from "./Screens/UserProfile";
+
+//settings
+import Security from "./Screens/Settingscode/Securitycode/Security";
+import Privacy from "./Screens/Settingscode/Privacycode/Privacy";
+import AccountPreferences from "./Screens/Settingscode/Accountpreferencescode/AccountPreferences";
+import NotificationSettings from "./Screens/Settingscode/Notificationsettingscode/NotificationSettings";
+import Language from "./Screens/Settingscode/Languagecode/Language";
+import HelpCenter from "./Screens/Settingscode/Helpcentercode/HelpCenter";
+import Signout from "./Screens/Settingscode/Signoutcode/Signout";
+
+//sub-settings
+import NameAccountPreference from "./Screens/Settingscode/Accountpreferencescode/NameAccountPreference";
+import LocationAccountPreference from "./Screens/Settingscode/Accountpreferencescode/LocationAccountPreference";
+import IndustryAccountPreference from "./Screens/Settingscode/Accountpreferencescode/IndustryAccountPreference";
+import EmailSecurity from "./Screens/Settingscode/Securitycode/EmailSecurity";
+import PhoneNumberSecurity from "./Screens/Settingscode/Securitycode/PhoneNumberSecurity";
+import PasswordSecurity from "./Screens/Settingscode/Securitycode/PasswordSecurity";
+import JobAlertNotificationSettings from "./Screens/Settingscode/Notificationsettingscode/JobAlertNotificationSettings";
+import SavedJobsNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/SavedJobsNotificationSettings";
+import JobRecommNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/JobRecommNotificationSettings";
+
 const Stack = createStackNavigator();
 
 const AppContent = () => {
@@ -37,7 +60,7 @@ const AppContent = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://192.168.2.206:3000/api/auth/validate-token", // do make sure to include your IP address here
+            "http://YOUR_IP_ADDRESS:3000/api/auth/validate-token", // do make sure to include your IP address here
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -83,6 +106,35 @@ const AppContent = () => {
           <Stack.Screen name="JobMap" component={JobMap} />
           <Stack.Screen name="SavedJobs" component={SavedJobs} />
           <Stack.Screen name="CareerExplorer" component={CareerExplorer} />
+
+          {/* Sidebar and User Profile */}
+          <Stack.Screen name="sideBar" component={sideBar} />
+          <Stack.Screen name="UserProfile" component={UserProfile} />
+
+          {/* Settings pages */}
+          <Stack.Screen name="Security" component={Security} />
+          <Stack.Screen name="Privacy" component={Privacy} />
+          <Stack.Screen name="AccountPreferences" component={AccountPreferences} />
+          <Stack.Screen name="NotificationSettings" component={NotificationSettings} />
+          <Stack.Screen name="Language" component={Language} />
+          <Stack.Screen name="HelpCenter" component={HelpCenter} />
+          <Stack.Screen name="Signout" component={Signout} />
+
+          {/* Sub-Settings pages */}
+          <Stack.Screen name="NameAccountPreference" component={NameAccountPreference} />
+          <Stack.Screen name="LocationAccountPreference" component={LocationAccountPreference} />
+          <Stack.Screen name="IndustryAccountPreference" component={IndustryAccountPreference} />
+          <Stack.Screen name="EmailSecurity" component={EmailSecurity} />
+          <Stack.Screen name="PhoneNumberSecurity" component={PhoneNumberSecurity} />
+          <Stack.Screen name="PasswordSecurity" component={PasswordSecurity} />
+          <Stack.Screen name="JobAlertNotificationSettings" component={JobAlertNotificationSettings} />
+          <Stack.Screen name="SavedJobsNotificationSettings" component={SavedJobsNotificationSettings} />
+          <Stack.Screen name="JobRecommNotificationSettings" component={JobRecommNotificationSettings} />
+
+
+
+
+
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationIndependentTree>
