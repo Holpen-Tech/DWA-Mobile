@@ -1,231 +1,160 @@
-import { useSortedScreens } from "expo-router/build/useScreens";
-import React, { useState } from "react";
+//import { useSortedScreens } from "expo-router/build/useScreens";
+import Constants from 'expo-constants';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
+  ActivityIndicator,
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
   Switch,
   TextInput,
 } from "react-native";
+import { Asset } from 'expo-asset';
+import { WebView } from 'react-native-webview';
+import { Linking } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+//import AsyncStorage from 'expo-secure-store'; // expos built-in solution
 import Icon from "react-native-vector-icons/FontAwesome";
 
-export default function JobMap({ navigation }) {
+export default function JobMap() {
+  const [htmlUri, setHtmlUri] = useState(null);
+  const [showTransit, setShowTransit] = useState(false);
+  const [showBikes, setShowBikes] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const webViewRef = useRef(null);
+
+  useEffect(() => {
+    (async () => {
+      const asset = Asset.fromModule(require("../../assets/jobsMap.html"));
+      await asset.downloadAsync();
+      setHtmlUri(asset.localUri || asset.uri);
+    })();
+  }, []);
+
+  const toggleSaveInAsyncStorage = async (job) => {
+    try {
+      const saved = await AsyncStorage.getItem("savedJobs");
+      let savedJobs = saved ? JSON.parse(saved) : [];
+  
+      const index = savedJobs.findIndex((j) => j.id === job._id);
+  
+      if (index !== -1) {
+        // Unsave job
+        savedJobs.splice(index, 1);
+      } else {
+        // Save job
+        savedJobs.push({
+          id: job._id,
+          title: job.job_title,
+          employer: job.employer,
+          url: job.url,
+          skillMatch: "N/A",
+          status: "Interested",
+        });
+      }
+  
+      await AsyncStorage.setItem("savedJobs", JSON.stringify(savedJobs));
+    } catch (e) {
+      console.error("Failed to toggle saved job in AsyncStorage:", e);
+    }
+  };
+
+  const sendFilterToWebView = (type, value) => {
+    const message = JSON.stringify({ type, value });
+    webViewRef.current?.postMessage(message);
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.logoContainer}>
           <Image source={require("./DWA-logo.png")} style={styles.logo} />
-          <Text style={styles.headerTitle}>Job Map</Text>
-        </View>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity>
-            <Icon name="search" size={20} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon name="bars" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
+          <Text style={styles.headerTitle}>Jobs Map</Text>
       </View>
 
       {/* Map Section */}
       <View style={styles.mapContainer}>
-        <Image source={require("./jobsmap2.png")} style={styles.map} />
+        {!htmlUri ? (
+          <ActivityIndicator size="large" color="#213E64" />
+        ) : (
+          <WebView
+            ref={webViewRef}
+            originWhitelist={["*"]}
+            source={{ uri: htmlUri }}
+            style={styles.map}
+            onShouldStartLoadWithRequest={(request) => {
+              // Open external links in browser
+              if (request.url.startsWith("http") && !request.url.includes("localhost") && !request.url.includes("file://")) {
+                Linking.openURL(request.url);
+                return false;
+              }
+              return true;
+            }}
+            onMessage={(event) => {
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+          
+                if (data.type === "TOGGLE_SAVE_JOB") {
+                  const job = data.job;
+                  toggleSaveInAsyncStorage(job);
+                }
+              } catch (e) {
+                console.error("Failed to parse message from WebView:", e);
+              }
+            }}
+          />
+        )}
       </View>
 
       {/* Filters Section */}
-      <ScrollView style={styles.filters}>
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>Job Markers</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.filterSearch}>
-          <TextInput style={styles.searchInput} placeholder="Search" />
-          <TouchableOpacity>
+      <ScrollView style={styles.filters} contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 10, }}>
+      <View style={styles.filterSearch}>
+          <TextInput 
+            style={styles.searchInput} 
+            placeholder="Search jobs or employers"
+            value={searchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              sendFilterToWebView("SEARCH", text);
+            }} 
+          />
+          <TouchableOpacity onPress={() => sendFilterToWebView("SEARCH", searchQuery)}>
             <Icon name="search" size={18} color="#000" />
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.filterItem}>
-          <Text style={styles.filterText}>Quick Find: All Tags</Text>
-          <Icon name="chevron-down" size={16} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterItem}>
-          <Text style={styles.filterText}>
-            Show All Occupational Categories
-          </Text>
-          <Icon name="chevron-down" size={16} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterItem}>
-          <Text style={styles.filterText}>Show All TEER Categories</Text>
-          <Icon name="chevron-down" size={16} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterItem}>
-          <Text style={styles.filterText}>Show All Job Types</Text>
-          <Icon name="chevron-down" size={16} color="#000" />
-        </TouchableOpacity>
+        
+        <View style={styles.optionalItems}>
+          <TouchableOpacity>
+            <Icon name="bus" size={18} color="#000" style={styles.icon} />
+          </TouchableOpacity>
+          <Text style={styles.filterText}>Show Transit Lines</Text>
+          <Switch
+            value={showTransit}
+            onValueChange={(value) => {
+              setShowTransit(value);
+              sendFilterToWebView("TRANSIT", value);
+            }}
+          />
+        </View>
 
         <View style={styles.optionalItems}>
           <TouchableOpacity>
             <Icon name="bicycle" size={18} color="#000" style={styles.icon} />
           </TouchableOpacity>
-          <Text style={styles.filterText}>Cycle Tour Routes</Text>
-          <Switch value={true} />
+          <Text style={styles.filterText}>Show Bike Routes</Text>
+          <Switch
+            value={showBikes}
+            onValueChange={(value) => {
+              setShowBikes(value);
+              sendFilterToWebView("BIKES", value);
+            }}
+          />
         </View>
 
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="bus" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Durham Region Transit Routes</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="wrench" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Apprenticeship Training Sites</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="child" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Child Care Centres</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="car" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>DriveTest Centres</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="building" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Education - Elementary Schools</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="school" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Education - Secondary Schools</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon
-              name="graduation-cap"
-              size={18}
-              color="#000"
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Education - Post Secondary</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="building" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Employment Agencies (Private)</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="building" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Employment Servicies</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="comments" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Language Training</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="book" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Literacy & Basic Skills</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="user" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>ODSP Employment Supports</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="user" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>
-            Ontario Disability Support Program
-          </Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="profile" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>
-            Ontario MLTSD Apprenticeship Office
-          </Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="user" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Ontario Works</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon name="profile" size={18} color="#000" style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Service Canada</Text>
-          <Switch value={true} />
-        </View>
-
-        <View style={styles.optionalItems}>
-          <TouchableOpacity>
-            <Icon
-              name="canadian-maple-leaf"
-              size={18}
-              color="#000"
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-          <Text style={styles.filterText}>Service Ontario</Text>
-          <Switch value={true} />
-        </View>
       </ScrollView>
 
       {/* Footer Navigation */}
@@ -255,16 +184,16 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     padding: 15,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  logoContainer: { flexDirection: "row", alignItems: "center" },
-  logo: { width: 40, height: 40, marginRight: 10 },
-  headerTitle: { fontSize: 18, fontWeight: "bold", color: "#000" },
+  logoContainerCentered: { flexDirection: "row", alignItems: "center" },
+  logo: { width: 40, height: 40, position: "absolute", left: 15 },
+  headerTitle: { fontSize: 20, fontWeight: "bold", color: "#213E64", textAlign: "center", flex: 1 },
   headerIcons: { flexDirection: "row", gap: 15 },
   icon: { marginLeft: 10 },
 
@@ -319,4 +248,54 @@ const styles = StyleSheet.create({
   },
   navButton: { alignItems: "center" },
   navText: { fontSize: 12, color: "#000" },
+
+  // 🔹 Added styles for job markers
+  marker: {
+    backgroundColor: "red",
+    padding: 5,
+    borderRadius: 10,
+  },
+  markerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "red",
+    padding: 5,
+    borderRadius: 10,
+  },
+  markerDot: {
+    width: 10,
+    height: 10,
+    backgroundColor: "red",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  markerText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  noJobsText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#333",
+  },
+  calloutContainer: {
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android
+  },
+  calloutText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#213E64",
+    textAlign: "center",
+  },
 });

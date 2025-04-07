@@ -5,11 +5,24 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "extra": {
+      "GOOGLE_MAPS_API_KEY":"AIzaSyDuzyrFSy2LjlO5aKUlWssmG65j7Xvn2IM",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "10fd0f03-67e0-4f02-9c44-c0376b755a06"
+      }
+    },
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.holpen.dwamobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 import {
   View,
@@ -187,3 +188,20 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 });
+=======
+import * as React from "react";
+import { View, Text } from "react-native";
+
+export default function Notifications({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text
+        onPress={() => navigation.navigate("Home")}
+        style={{ fontSize: 26, fontWeight: "bold" }}
+      >
+        Details Screen
+      </Text>
+    </View>
+  );
+}
+>>>>>>> feature/jobs-map
