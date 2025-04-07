@@ -44,7 +44,7 @@ export default function JobBoard({ navigation }) {
   ];
 
   const fetchJobs = () => {
-    return fetch("http://192.168.2.43:3000/api/jobs")
+    return fetch("http://192.168.0.27:3000/api/jobs")
       .then((response) => response.json())
       .then((data) => {
         setJobData(data);
