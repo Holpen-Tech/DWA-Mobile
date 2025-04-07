@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState } from "react";
 import {
   View,
@@ -288,20 +287,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-=======
-import * as React from "react";
-import { View, Text } from "react-native";
-
-export default function Settings({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text
-        onPress={() => navigation.navigate("Home")}
-        style={{ fontSize: 26, fontWeight: "bold" }}
-      >
-        Settings Screen
-      </Text>
-    </View>
-  );
-}
->>>>>>> feature/jobs-map

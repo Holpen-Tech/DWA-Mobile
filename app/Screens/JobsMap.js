@@ -156,26 +156,6 @@ export default function JobMap() {
         </View>
 
       </ScrollView>
-
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="home" size={20} color="#000" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="bookmark" size={20} color="#000" />
-          <Text style={styles.navText}>My Jobs</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="bell" size={20} color="#000" />
-          <Text style={styles.navText}>Notifications</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Icon name="cog" size={20} color="#000" />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
