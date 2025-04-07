@@ -34,6 +34,7 @@ export default function Homepage({ navigation }) {
     {
       title: "Resume Builder",
       image: require("./Resumebuilderimage.png"),
+      screen: "ResumeBuilder",
     },
     { title: "Cover Letter", image: require("./Coverletterimage.png") },
   ];

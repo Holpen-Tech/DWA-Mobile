@@ -25,6 +25,29 @@ import MainContainer from "./Screens/MainContainer";
 import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
+import ResumeBuilder from "./Screens/ResumeBuilder";
+import PersonalDetails from "./Screens/PersonalDetails";
+import Summary from "./Screens/Summary";
+import Experience from "./Screens/Experience";
+import AddPosition from "./Screens/AddPosition";
+import AddResponsibilities from "./Screens/AddResponsibilities";
+import Skills from "./Screens/Skills";
+import Education from "./Screens/Education";
+import AddSchool from "./Screens/AddSchool";
+import Courses from "./Screens/Courses";
+import AddSection from "./Screens/AddSection";
+import Templates from "./Screens/Templates";
+import PreviewResume from "./Screens/PreviewResume";
+import Awards from "./Screens/Awards";
+import AddAward from "./Screens/AddAward";
+import VolunteerExp from "./Screens/VolunteerExp";
+import AddVPosition from "./Screens/AddVPosition";
+import AddVResponsibilities from "./Screens/AddVResponsibilities";
+import Languages from "./Screens/Languages";
+import AddLanguage from "./Screens/AddLanguage";
+import References from "./Screens/References";
+import AddReference from "./Screens/AddReference";
+import CustomSection from "./Screens/CustomSection";
 
 const Stack = createStackNavigator();
 
@@ -37,7 +60,7 @@ const AppContent = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://192.168.2.16:3000/api/auth/validate-token",
+            "http://192.168.40.2:3000/api/auth/validate-token",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -82,6 +105,30 @@ const AppContent = () => {
           <Stack.Screen name="JobMap" component={JobMap} />
           <Stack.Screen name="SavedJobs" component={SavedJobs} />
           <Stack.Screen name="CareerExplorer" component={CareerExplorer} />
+          <Stack.Screen name="ResumeBuilder" component={ResumeBuilder} />
+          <Stack.Screen name="PersonalDetails" component={PersonalDetails} />
+          <Stack.Screen name="Summary" component={Summary} />
+          <Stack.Screen name="Experience" component={Experience} />
+          <Stack.Screen name="AddPosition" component={AddPosition} />
+          <Stack.Screen name="AddResponsibilities" component={AddResponsibilities} />
+          <Stack.Screen name="Skills" component={Skills} />
+          <Stack.Screen name="Education" component={Education} />
+          <Stack.Screen name="AddSchool" component={AddSchool} />
+          <Stack.Screen name="Courses" component={Courses} />
+          <Stack.Screen name="AddSection" component={AddSection} />
+          <Stack.Screen name="Templates" component={Templates} />
+          <Stack.Screen name="PreviewResume" component={PreviewResume} />
+          <Stack.Screen name="Awards" component={Awards} />
+          <Stack.Screen name="AddAward" component={AddAward} />
+          <Stack.Screen name="Volunteer" component={VolunteerExp} />
+          <Stack.Screen name="AddVPosition" component={AddVPosition} />
+          <Stack.Screen name="AddVResponsibilities" component={AddVResponsibilities} />
+          <Stack.Screen name="Languages" component={Languages} />
+          <Stack.Screen name="AddLanguage" component={AddLanguage} />
+          <Stack.Screen name="References" component={References} />
+          <Stack.Screen name="AddReference" component={AddReference} />
+          <Stack.Screen name="CustomSection" component={CustomSection} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationIndependentTree>
