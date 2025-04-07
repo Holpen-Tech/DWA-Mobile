@@ -40,7 +40,7 @@ const SurveyPage = ({ navigation }) => {
                 style={styles.buttonGradient}
               >
                 <Text style={styles.buttonTextPrimary}>
-                  Take the 2024 Survey
+                  Take the 2026 Survey
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -69,7 +69,7 @@ const SurveyPage = ({ navigation }) => {
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              © 2024 Durham Workforce Authority
+              © 2025 Durham Workforce Authority
             </Text>
           </View>
         </View>

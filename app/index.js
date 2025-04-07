@@ -25,7 +25,7 @@ import MainContainer from "./Screens/MainContainer";
 import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
-
+import WelcomeScreen from "./Screens/WelcomeScreen"
 import sideBar from "./Screens/sideBar";
 import UserProfile from "./Screens/UserProfile";
 
