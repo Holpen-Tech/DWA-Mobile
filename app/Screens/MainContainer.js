@@ -13,19 +13,19 @@ import JobBoard from "./JobBoard";
 import JobMap from "./JobsMap";
 import CareerExplorer from "./CareerExplorer";
 
-// Invenator (Greatness): Screen names
+//  Screen names
 const homeName = "Home";
 const savedJobsName = "Saved Jobs";
 const notificationsName = "Notifications";
 const settingsName = "Settings";
 
-// Invenator (Greatness): Create stacks for each tab
+// Create stacks for each tab
 const HomeStack = createStackNavigator();
 const SavedJobsStack = createStackNavigator();
 const NotificationsStack = createStackNavigator();
 const SettingsStack = createStackNavigator();
 
-// Invenator (Greatness): Home Stack
+//  Home Stack
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
@@ -38,7 +38,7 @@ function HomeStackScreen() {
   );
 }
 
-// Invenator (Greatness): Saved Jobs Stack
+// Saved Jobs Stack
 function SavedJobsStackScreen() {
   return (
     <SavedJobsStack.Navigator screenOptions={{ headerShown: false }}>
@@ -48,17 +48,20 @@ function SavedJobsStackScreen() {
   );
 }
 
-// Invenator (Greatness): Notifications Stack
+//  Notifications Stack
 function NotificationsStackScreen() {
   return (
     <NotificationsStack.Navigator screenOptions={{ headerShown: false }}>
-      <NotificationsStack.Screen name="NotificationsScreen" component={Notifications} />
+      <NotificationsStack.Screen
+        name="NotificationsScreen"
+        component={Notifications}
+      />
       {/* Add screens accessible from Notifications */}
     </NotificationsStack.Navigator>
   );
 }
 
-// Invenator (Greatness): Settings Stack
+// Settings Stack
 function SettingsStackScreen() {
   return (
     <SettingsStack.Navigator screenOptions={{ headerShown: false }}>

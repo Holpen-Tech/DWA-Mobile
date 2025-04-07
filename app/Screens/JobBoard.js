@@ -31,10 +31,7 @@ export default function JobBoard({ navigation }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobDetailsModalVisible, setJobDetailsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(0);
 
-  // Durham Region Municipalities
   const DURHAM_REGIONS = [
     "Ajax",
     "Brock",
@@ -47,7 +44,7 @@ export default function JobBoard({ navigation }) {
   ];
 
   const fetchJobs = () => {
-    return fetch("http://YOUR_IP_ADDRESS:3000/api/jobs")
+    return fetch("http://192.168.0.27:3000/api/jobs")
       .then((response) => response.json())
       .then((data) => {
         setJobData(data);
@@ -83,10 +80,8 @@ export default function JobBoard({ navigation }) {
       const existingIndex = savedJobs.findIndex((j) => j.id === item._id);
 
       if (existingIndex > -1) {
-        // Remove if already saved
         savedJobs = savedJobs.filter((j) => j.id !== item._id);
       } else {
-        // Add new saved job
         savedJobs.push({
           id: item._id,
           title: item.job_title,
@@ -136,14 +131,12 @@ export default function JobBoard({ navigation }) {
       const result = await Share.share({
         message: `Check out this job opportunity: ${job.job_title}\n${job.url}`,
         title: `Share ${job.job_title} Position`,
-        url: job.url, // Some platforms may use this
+        url: job.url,
       });
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // Shared with activity type of result.activityType
-        } else {
-          // Shared
+          // Shared with activity type
         }
       } else if (result.action === Share.dismissedAction) {
         // Dismissed
@@ -152,10 +145,12 @@ export default function JobBoard({ navigation }) {
       console.error("Error sharing:", error.message);
     }
   };
+
   const openJobDetails = (job) => {
     setSelectedJob(job);
     setJobDetailsModalVisible(true);
   };
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchJobs().finally(() => setRefreshing(false));
@@ -205,7 +200,7 @@ export default function JobBoard({ navigation }) {
               <Icon
                 name={isSaved ? "bookmark" : "bookmark-o"}
                 size={14}
-                color={isSaved ? "#213E64" : "#fff"}
+                color={isSaved ? "#649A47" : "#fff"}
               />
             </View>
           </TouchableOpacity>
@@ -224,13 +219,16 @@ export default function JobBoard({ navigation }) {
     );
   };
 
+  const displayedJobs = filteredJobs.filter((job) =>
+    job.job_title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Image source={require("./DWA-logo.png")} style={styles.logo} />
         <Text style={styles.title}>Jobs Board</Text>
       </View>
-
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Icon
@@ -257,6 +255,19 @@ export default function JobBoard({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.statsBanner}>
+        <Text style={styles.statsText}>
+          {displayedJobs.length} {displayedJobs.length === 1 ? "job" : "jobs"}{" "}
+          found
+        </Text>
+        {(selectedType || selectedRegion || sortBy) && (
+          <TouchableOpacity onPress={clearFilters}>
+            <Text style={styles.clearAllText}>Clear all filters</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <Animated.View
         style={styles.filterChipsContainer}
         layout={Layout.duration(200)}
@@ -316,15 +327,14 @@ export default function JobBoard({ navigation }) {
           </Animated.View>
         )}
       </Animated.View>
+
       {loading ? (
         <ActivityIndicator size="large" color="#213E64" />
       ) : error ? (
         <Text style={styles.errorText}>Error: {error}</Text>
       ) : (
         <FlatList
-          data={filteredJobs.filter((job) =>
-            job.job_title.toLowerCase().includes(searchQuery.toLowerCase())
-          )}
+          data={displayedJobs}
           keyExtractor={(item) => item._id}
           renderItem={renderJobCard}
           contentContainerStyle={styles.jobList}
@@ -344,7 +354,6 @@ export default function JobBoard({ navigation }) {
           <View style={styles.modalContent}>
             <Text style={styles.filterTitle}>Filter Jobs</Text>
 
-            {/* Job Type */}
             <Text style={styles.filterLabel}>Job Type</Text>
             <View style={styles.filterOptions}>
               <TouchableOpacity
@@ -354,7 +363,14 @@ export default function JobBoard({ navigation }) {
                 ]}
                 onPress={() => setSelectedType("FT")}
               >
-                <Text style={styles.optionText}>Full Time</Text>
+                <Text
+                  style={[
+                    styles.optionText,
+                    selectedType === "FT" && styles.selectedOptionText,
+                  ]}
+                >
+                  Full Time
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -363,11 +379,17 @@ export default function JobBoard({ navigation }) {
                 ]}
                 onPress={() => setSelectedType("PT")}
               >
-                <Text style={styles.optionText}>Part Time</Text>
+                <Text
+                  style={[
+                    styles.optionText,
+                    selectedType === "PT" && styles.selectedOptionText,
+                  ]}
+                >
+                  Part Time
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Region Filter */}
             <Text style={styles.filterLabel}>Region</Text>
             <ScrollView
               horizontal
@@ -383,12 +405,18 @@ export default function JobBoard({ navigation }) {
                   ]}
                   onPress={() => setSelectedRegion(region)}
                 >
-                  <Text style={styles.optionText}>{region}</Text>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedRegion === region && styles.selectedOptionText,
+                    ]}
+                  >
+                    {region}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
-            {/* Sorting */}
             <Text style={styles.filterLabel}>Sort By</Text>
             <View style={styles.filterOptions}>
               <TouchableOpacity
@@ -398,7 +426,14 @@ export default function JobBoard({ navigation }) {
                 ]}
                 onPress={() => setSortBy("newest")}
               >
-                <Text style={styles.optionText}>Newest</Text>
+                <Text
+                  style={[
+                    styles.optionText,
+                    sortBy === "newest" && styles.selectedOptionText,
+                  ]}
+                >
+                  Newest
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -407,11 +442,17 @@ export default function JobBoard({ navigation }) {
                 ]}
                 onPress={() => setSortBy("oldest")}
               >
-                <Text style={styles.optionText}>Oldest</Text>
+                <Text
+                  style={[
+                    styles.optionText,
+                    sortBy === "oldest" && styles.selectedOptionText,
+                  ]}
+                >
+                  Oldest
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Buttons */}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.applyButton}
@@ -429,6 +470,7 @@ export default function JobBoard({ navigation }) {
           </View>
         </View>
       </Modal>
+
       {/* Job Details Modal */}
       <Modal
         animationType="slide"
@@ -538,18 +580,25 @@ export default function JobBoard({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f4f4f4" },
+  container: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "white",
+    backgroundColor: "white", // Changed back to white
   },
-  logo: { width: 35, height: 35, marginRight: 10 },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
   title: {
     fontSize: 25,
     fontWeight: "bold",
-    color: "#213E64",
+    color: "#213E64", // Original color
     paddingLeft: 55,
   },
   searchContainer: {
@@ -579,24 +628,74 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#213E64",
   },
+  filterButton: {
+    backgroundColor: "#213E64",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
   filterText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
   },
-  errorText: { color: "red", textAlign: "center", marginTop: 10 },
-  jobList: { padding: 10 },
+  statsBanner: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#f8f8f8",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  statsText: {
+    color: "#666",
+    fontWeight: "500",
+  },
+  clearAllText: {
+    color: "#213E64",
+    fontWeight: "500",
+    textDecorationLine: "underline",
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  jobList: {
+    padding: 10,
+  },
   jobCard: {
     backgroundColor: "#213E64",
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
   },
-  jobTitle: { fontSize: 18, fontWeight: "bold", color: "#fff" },
-  jobCompany: { fontSize: 14, color: "#cce4ff", marginVertical: 5 },
-  jobDetails: { fontSize: 12, color: "#cce4ff" },
-  jobDescription: { fontSize: 14, color: "#fff", marginVertical: 10 },
-  jobActions: { flexDirection: "row", justifyContent: "space-between", gap: 5 },
+  jobTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  jobCompany: {
+    fontSize: 14,
+    color: "#cce4ff",
+    marginVertical: 5,
+  },
+  jobDetails: {
+    fontSize: 12,
+    color: "#cce4ff",
+  },
+  jobDescription: {
+    fontSize: 14,
+    color: "#fff",
+    marginVertical: 10,
+  },
+  jobActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 5,
+  },
   actionButton: {
     backgroundColor: "#0056b3",
     padding: 8,
@@ -605,20 +704,19 @@ const styles = StyleSheet.create({
   savedButton: {
     backgroundColor: "white",
     borderWidth: 1,
-    borderColor: "#213E64",
+    borderColor: "#649A47",
   },
   actionText: {
     fontSize: 12,
     color: "#fff",
   },
   savedText: {
-    color: "#213E64",
+    color: "#649A47",
   },
-  filterButton: {
-    backgroundColor: "#213E64",
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   modalContainer: {
     flex: 1,
@@ -632,7 +730,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
-  filterTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+  filterTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
   filterLabel: {
     fontSize: 16,
     fontWeight: "bold",
@@ -645,17 +747,20 @@ const styles = StyleSheet.create({
   },
   filterOption: {
     padding: 10,
-    backgroundColor: "#ccc",
+    backgroundColor: "#f5f5f5",
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
   },
   selectedOption: {
-    backgroundColor: "#213E64",
+    backgroundColor: "#649A47",
   },
   optionText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  selectedOptionText: {
     color: "#fff",
-    fontWeight: "bold",
   },
   regionScrollContainer: {
     flexDirection: "row",
@@ -674,7 +779,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   clearButton: {
-    backgroundColor: "red",
+    backgroundColor: "#e74c3c",
     padding: 10,
     borderRadius: 5,
     flex: 1,
@@ -683,11 +788,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
   },
   jobDetailsModalContainer: {
     flex: 1,
@@ -717,7 +817,7 @@ const styles = StyleSheet.create({
   },
   jobDetailsCompany: {
     fontSize: 16,
-    color: "#666",
+    color: "#649A47",
     marginBottom: 15,
   },
   jobDetailsInfoContainer: {
@@ -799,9 +899,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 8,
     paddingHorizontal: 10,
+    paddingVertical: 7,
     paddingBottom: 10,
     backgroundColor: "#fff",
-    minHeight: 20, // Prevent layout shift when empty
+    minHeight: 20,
   },
   filterChip: {
     flexDirection: "row",

@@ -25,7 +25,7 @@ import MainContainer from "./Screens/MainContainer";
 import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
-
+import WelcomeScreen from "./Screens/WelcomeScreen";
 const Stack = createStackNavigator();
 
 const AppContent = () => {
@@ -68,6 +68,7 @@ const AppContent = () => {
           }}
         >
           {/* Show Onboarding/Login/Signup first */}
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="onboardingOne" component={onboardingOne} />
           <Stack.Screen name="onboardingTwo" component={onboardingTwo} />
           <Stack.Screen name="onboardingThree" component={onboardingThree} />
