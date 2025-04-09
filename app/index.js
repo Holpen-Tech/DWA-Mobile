@@ -91,7 +91,7 @@ const AppContent = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://192.168.2.206:3000/api/auth/validate-token", // do make sure to include your IP address here
+            "http://YOUR_ID_ADDRESS:3000/api/auth/validate-token", // do make sure to include your IP address here
             {
               headers: { Authorization: `Bearer ${token}` },
             }
