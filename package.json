@@ -67,7 +67,8 @@
     "react-native-webview": "13.12.5",
     "react-navigation": "^5.0.0",
     "styled-components": "^6.1.13",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-checkbox": "~4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

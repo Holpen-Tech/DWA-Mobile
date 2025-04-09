@@ -33,7 +33,7 @@ import WelcomeScreen from "./Screens/WelcomeScreen"
 import sideBar from "./Screens/sideBar";
 import UserProfile from "./Screens/UserProfile";
 
-//settings
+// settings
 import Security from "./Screens/Settingscode/Securitycode/Security";
 import Privacy from "./Screens/Settingscode/Privacycode/Privacy";
 import AccountPreferences from "./Screens/Settingscode/Accountpreferencescode/AccountPreferences";
@@ -42,7 +42,7 @@ import Language from "./Screens/Settingscode/Languagecode/Language";
 import HelpCenter from "./Screens/Settingscode/Helpcentercode/HelpCenter";
 import Signout from "./Screens/Settingscode/Signoutcode/Signout";
 
-//sub-settings
+// sub-settings
 import NameAccountPreference from "./Screens/Settingscode/Accountpreferencescode/NameAccountPreference";
 import LocationAccountPreference from "./Screens/Settingscode/Accountpreferencescode/LocationAccountPreference";
 import IndustryAccountPreference from "./Screens/Settingscode/Accountpreferencescode/IndustryAccountPreference";
@@ -52,6 +52,31 @@ import PasswordSecurity from "./Screens/Settingscode/Securitycode/PasswordSecuri
 import JobAlertNotificationSettings from "./Screens/Settingscode/Notificationsettingscode/JobAlertNotificationSettings";
 import SavedJobsNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/SavedJobsNotificationSettings";
 import JobRecommNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/JobRecommNotificationSettings";
+
+// resume-builder
+import ResumeBuilder from "./Screens/ResumeBuilder";
+import PersonalDetails from "./Screens/PersonalDetails";
+import Summary from "./Screens/Summary";
+import Experience from "./Screens/Experience";
+import AddPosition from "./Screens/AddPosition";
+import AddResponsibilities from "./Screens/AddResponsibilities";
+import Skills from "./Screens/Skills";
+import Education from "./Screens/Education";
+import AddSchool from "./Screens/AddSchool";
+import Courses from "./Screens/Courses";
+import AddSection from "./Screens/AddSection";
+import Templates from "./Screens/Templates";
+import PreviewResume from "./Screens/PreviewResume";
+import Awards from "./Screens/Awards";
+import AddAward from "./Screens/AddAward";
+import VolunteerExp from "./Screens/VolunteerExp";
+import AddVPosition from "./Screens/AddVPosition";
+import AddVResponsibilities from "./Screens/AddVResponsibilities";
+import Languages from "./Screens/Languages";
+import AddLanguage from "./Screens/AddLanguage";
+import References from "./Screens/References";
+import AddReference from "./Screens/AddReference";
+import CustomSection from "./Screens/CustomSection";
 
 const Stack = createStackNavigator();
 
@@ -161,6 +186,32 @@ const AppContent = () => {
           <Stack.Screen name="JobAlertNotificationSettings" component={JobAlertNotificationSettings} />
           <Stack.Screen name="SavedJobsNotificationSettings" component={SavedJobsNotificationSettings} />
           <Stack.Screen name="JobRecommNotificationSettings" component={JobRecommNotificationSettings} />
+
+          {/* Resume Builder pages */}
+          <Stack.Screen name="ResumeBuilder" component={ResumeBuilder} />
+          <Stack.Screen name="PersonalDetails" component={PersonalDetails} />
+          <Stack.Screen name="Summary" component={Summary} />
+          <Stack.Screen name="Experience" component={Experience} />
+          <Stack.Screen name="AddPosition" component={AddPosition} />
+          <Stack.Screen name="AddResponsibilities" component={AddResponsibilities} />
+          <Stack.Screen name="Skills" component={Skills} />
+          <Stack.Screen name="Education" component={Education} />
+          <Stack.Screen name="AddSchool" component={AddSchool} />
+          <Stack.Screen name="Courses" component={Courses} />
+          <Stack.Screen name="AddSection" component={AddSection} />
+          <Stack.Screen name="Templates" component={Templates} />
+          <Stack.Screen name="PreviewResume" component={PreviewResume} />
+          <Stack.Screen name="Awards" component={Awards} />
+          <Stack.Screen name="AddAward" component={AddAward} />
+          <Stack.Screen name="Volunteer" component={VolunteerExp} />
+          <Stack.Screen name="AddVPosition" component={AddVPosition} />
+          <Stack.Screen name="AddVResponsibilities" component={AddVResponsibilities} />
+          <Stack.Screen name="Languages" component={Languages} />
+          <Stack.Screen name="AddLanguage" component={AddLanguage} />
+          <Stack.Screen name="References" component={References} />
+          <Stack.Screen name="AddReference" component={AddReference} />
+          <Stack.Screen name="CustomSection" component={CustomSection} />
+
         </Stack.Navigator>
       </NavigationContainer>
       </Animated.View>

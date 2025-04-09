@@ -69,6 +69,7 @@ export default function Homepage({ navigation }) {
       description: "Create professional resumes",
       icon: "file-text-o",
       image: require("./Resumebuilderimage.png"),
+      screen: "ResumeBuilder",
       color: "#9370DB",
     },
     {
