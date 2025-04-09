@@ -51,7 +51,7 @@
 
 
     async function fetchJobs() {
-      const response = await fetch("http://192.168.2.206:3000/api/jobs/map");
+      const response = await fetch("http://YOUR_IP_ADDRESS:3000/api/jobs/map");
       const data = await response.json();
       return data.jobs;
     }
@@ -174,7 +174,7 @@
 
     async function loadTransitRoutes() {
       try {
-        const response = await fetch('http://192.168.2.206:3000/static/Transit_Routes.geojson');
+        const response = await fetch('http://YOUR_IP_ADDRESS:3000/static/Transit_Routes.geojson');
         const geojson = await response.json();
         transitFeatures = map.data.addGeoJson(geojson);
         console.log("GeoJSON added to map");
