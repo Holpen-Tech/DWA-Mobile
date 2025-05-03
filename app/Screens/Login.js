@@ -125,7 +125,7 @@ export default function LoginScreen({ navigation }) {
         const token = await AsyncStorage.getItem("userToken");
         if (token) {
           const response = await axios.get(
-            "http://YOUR_IP_ADDRESS:3000/api/auth/verify", // do make sure to include your IP address here
+            "http://192.168.0.31:3000/api/auth/verify", // do make sure to include your IP address here
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -157,7 +157,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://YOUR_IP_ADDRESS:3000/api/auth/login",
+        "http://192.168.0.31:3000/api/auth/login",
         {
           email: values.email,
           password: values.password,

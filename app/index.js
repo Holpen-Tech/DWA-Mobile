@@ -9,7 +9,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { UserProvider, UserContext } from "./contexts/UserContext";
-import * as SplashScreenExpo from 'expo-splash-screen';
+import * as SplashScreenExpo from "expo-splash-screen";
 
 // Import SplashScreen component
 import SplashScreen from "./Screens/SplashScreen";
@@ -29,7 +29,7 @@ import MainContainer from "./Screens/MainContainer";
 import Settings from "./Screens/Settings";
 import Notifications from "./Screens/notifications";
 import CareerExplorer from "./Screens/CareerExplorer";
-import WelcomeScreen from "./Screens/WelcomeScreen"
+import WelcomeScreen from "./Screens/WelcomeScreen";
 import sideBar from "./Screens/sideBar";
 import UserProfile from "./Screens/UserProfile";
 
@@ -50,8 +50,8 @@ import EmailSecurity from "./Screens/Settingscode/Securitycode/EmailSecurity";
 import PhoneNumberSecurity from "./Screens/Settingscode/Securitycode/PhoneNumberSecurity";
 import PasswordSecurity from "./Screens/Settingscode/Securitycode/PasswordSecurity";
 import JobAlertNotificationSettings from "./Screens/Settingscode/Notificationsettingscode/JobAlertNotificationSettings";
-import SavedJobsNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/SavedJobsNotificationSettings";
-import JobRecommNotificationSettings from"./Screens/Settingscode/Notificationsettingscode/JobRecommNotificationSettings";
+import SavedJobsNotificationSettings from "./Screens/Settingscode/Notificationsettingscode/SavedJobsNotificationSettings";
+import JobRecommNotificationSettings from "./Screens/Settingscode/Notificationsettingscode/JobRecommNotificationSettings";
 
 const Stack = createStackNavigator();
 
@@ -66,7 +66,7 @@ const AppContent = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://192.168.2.206:3000/api/auth/validate-token", // do make sure to include your IP address here
+            "http://192.168.0.31:3000/api/auth/validate-token", // do make sure to include your IP address here
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -121,48 +121,78 @@ const AppContent = () => {
               }),
             }}
           >
-          {/* Show Onboarding/Login/Signup first */}
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="onboardingOne" component={onboardingOne} />
-          <Stack.Screen name="onboardingTwo" component={onboardingTwo} />
-          <Stack.Screen name="onboardingThree" component={onboardingThree} />
-          <Stack.Screen name="survey" component={survey} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Signup" component={Signup} />
+            {/* Show Onboarding/Login/Signup first */}
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="onboardingOne" component={onboardingOne} />
+            <Stack.Screen name="onboardingTwo" component={onboardingTwo} />
+            <Stack.Screen name="onboardingThree" component={onboardingThree} />
+            <Stack.Screen name="survey" component={survey} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Signup" component={Signup} />
 
-          {/* Main App with Bottom Tab Navigation */}
-          <Stack.Screen name="MainContainer" component={MainContainer} />
-          <Stack.Screen name="Homepage" component={Homepage} />
-          <Stack.Screen name="JobBoard" component={JobBoard} />
-          <Stack.Screen name="JobMap" component={JobMap} />
-          <Stack.Screen name="SavedJobs" component={SavedJobs} />
-          <Stack.Screen name="CareerExplorer" component={CareerExplorer} />
+            {/* Main App with Bottom Tab Navigation */}
+            <Stack.Screen name="MainContainer" component={MainContainer} />
+            <Stack.Screen name="Homepage" component={Homepage} />
+            <Stack.Screen name="JobBoard" component={JobBoard} />
+            <Stack.Screen name="JobMap" component={JobMap} />
+            <Stack.Screen name="SavedJobs" component={SavedJobs} />
+            <Stack.Screen name="CareerExplorer" component={CareerExplorer} />
 
-          {/* Sidebar and User Profile */}
-          <Stack.Screen name="sideBar" component={sideBar} />
-          <Stack.Screen name="UserProfile" component={UserProfile} />
+            {/* Sidebar and User Profile */}
+            <Stack.Screen name="sideBar" component={sideBar} />
+            <Stack.Screen name="UserProfile" component={UserProfile} />
 
-          {/* Settings pages */}
-          <Stack.Screen name="Security" component={Security} />
-          <Stack.Screen name="Privacy" component={Privacy} />
-          <Stack.Screen name="AccountPreferences" component={AccountPreferences} />
-          <Stack.Screen name="NotificationSettings" component={NotificationSettings} />
-          <Stack.Screen name="Language" component={Language} />
-          <Stack.Screen name="HelpCenter" component={HelpCenter} />
-          <Stack.Screen name="Signout" component={Signout} />
+            {/* Settings pages */}
+            <Stack.Screen name="Security" component={Security} />
+            <Stack.Screen name="Privacy" component={Privacy} />
+            <Stack.Screen
+              name="AccountPreferences"
+              component={AccountPreferences}
+            />
+            <Stack.Screen
+              name="NotificationSettings"
+              component={NotificationSettings}
+            />
+            <Stack.Screen name="Language" component={Language} />
+            <Stack.Screen name="HelpCenter" component={HelpCenter} />
+            <Stack.Screen name="Signout" component={Signout} />
 
-          {/* Sub-Settings pages */}
-          <Stack.Screen name="NameAccountPreference" component={NameAccountPreference} />
-          <Stack.Screen name="LocationAccountPreference" component={LocationAccountPreference} />
-          <Stack.Screen name="IndustryAccountPreference" component={IndustryAccountPreference} />
-          <Stack.Screen name="EmailSecurity" component={EmailSecurity} />
-          <Stack.Screen name="PhoneNumberSecurity" component={PhoneNumberSecurity} />
-          <Stack.Screen name="PasswordSecurity" component={PasswordSecurity} />
-          <Stack.Screen name="JobAlertNotificationSettings" component={JobAlertNotificationSettings} />
-          <Stack.Screen name="SavedJobsNotificationSettings" component={SavedJobsNotificationSettings} />
-          <Stack.Screen name="JobRecommNotificationSettings" component={JobRecommNotificationSettings} />
-        </Stack.Navigator>
-      </NavigationContainer>
+            {/* Sub-Settings pages */}
+            <Stack.Screen
+              name="NameAccountPreference"
+              component={NameAccountPreference}
+            />
+            <Stack.Screen
+              name="LocationAccountPreference"
+              component={LocationAccountPreference}
+            />
+            <Stack.Screen
+              name="IndustryAccountPreference"
+              component={IndustryAccountPreference}
+            />
+            <Stack.Screen name="EmailSecurity" component={EmailSecurity} />
+            <Stack.Screen
+              name="PhoneNumberSecurity"
+              component={PhoneNumberSecurity}
+            />
+            <Stack.Screen
+              name="PasswordSecurity"
+              component={PasswordSecurity}
+            />
+            <Stack.Screen
+              name="JobAlertNotificationSettings"
+              component={JobAlertNotificationSettings}
+            />
+            <Stack.Screen
+              name="SavedJobsNotificationSettings"
+              component={SavedJobsNotificationSettings}
+            />
+            <Stack.Screen
+              name="JobRecommNotificationSettings"
+              component={JobRecommNotificationSettings}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
       </Animated.View>
     </NavigationIndependentTree>
   );
